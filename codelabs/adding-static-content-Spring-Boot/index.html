@@ -1,0 +1,116 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Adding Static Content to a Spring Boot Application</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="adding-static-content-Spring-Boot"
+                  title="Adding Static Content to a Spring Boot Application"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="5">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>Adding a static HTML file to a Spring Boot server</li>
+<li>Testing the server</li>
+<li>Making changes quickly</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Adding static content" duration="0">
+        <p>In IntelliJ, create a new project as per the &#34;Starting Spring Boot&#34; tutorial.</p>
+<aside class="special"><p>RECALL: Spring Boot follows the convention-over-configuration pattern.  The static files can be found in <code>/src/main/resources/static</code>.</p>
+</aside>
+<p>You will need to create the <code>static</code> folder.</p>
+<p class="image-container"><img alt="Adding the static folder" src="img\ad36d0c216d37b4c.png"></p>
+<p>Right-click on the resources folder and create a new directory.  Call it &#34;static&#34;.</p>
+<p>Now, right-click on the new folder and create a new HTML file.  Call it &#34;index.html&#34; and add some content.</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&#34;en&#34;&gt;
+&lt;head&gt;
+    &lt;meta charset=&#34;UTF-8&#34;&gt;
+    &lt;title&gt;Hello World&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div&gt;
+    Hello World!
+
+    &lt;H1&gt;Things to note:&lt;/H1&gt;
+    &lt;ul&gt;
+        &lt;li&gt;The generated code gave us a working application capable of handling requests.&lt;/li&gt;
+        &lt;li&gt;To get a real page, add a HTML file to ~/main/resources/static.&lt;/li&gt;
+        &lt;li&gt;With DevTools installed, you don&#39;t need to restart the server, but you do need to re-build the code. Use
+            gradle assemble.
+        &lt;/li&gt;
+        &lt;li&gt;You can use Live Reload in your browser to trigger a page reload on change.&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Install a Live Reload Plug-in" duration="0">
+        <aside class="special"><p>Install a Live Reload plug-in/extension for your browser of choice.</p>
+</aside>
+<p>There are many available.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run the project" duration="0">
+        <p>Run the Spring Boot application using the bootrun method.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="View the content" duration="0">
+        <p>Go to http://localhost:8080 in a browser of your choice.</p>
+<p>You will see the page.  Spring Boot routes to the index.html page as you would expect.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Change and reload the content" duration="0">
+        <p>Leave the server running.</p>
+<p>Make a change to the HTML page.</p>
+<p>Execute gradle &gt; build &gt; classes.</p>
+<p>The change should appear in the browser automatically.  This is Live Reload<br>in action.  If you examine the server log, you will see that a Live Reload<br>server is started for you.  This is because we included DevTools in the<br>project.</p>
+<aside class="warning"><p>What could be the problem with this?</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

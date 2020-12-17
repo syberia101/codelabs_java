@@ -1,0 +1,142 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Spring Security Basic Configuration</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="spring-security-basic-config"
+                  title="Spring Security Basic Configuration"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul>
+<li>How to add a simple configuration to Spring Security.</li>
+<li>How to protect a page with a form login.</li>
+<li>How to protect a range of pages with a form login.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Where to add a simple Spring Security configuration" duration="20">
+        <aside class="special"><p>https://spring.io/guides/gs/securing-web/</p>
+</aside>
+<ul>
+<li>The <code>WebSecurityConfigurer</code> interface allows customisation of an applications <code>WebSecurity</code>.</li>
+<li>Create a class that extends <code>WebSecurityConfigurerAdapter</code> and is annotated with both <code>@Configuration</code> and <code>@EnableWebSecurity</code>.</li>
+</ul>
+<pre><code language="language-java" class="language-java">@Configuration
+@EnableWebSecurity
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		 //put most of your configuration here.
+	}
+}
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Protect a single page with the default Spring login page" duration="20">
+        <aside class="special"><p>https://docs.spring.io/spring-security/site/docs/current/reference/html5/#servlet-authorization-filtersecurityinterceptor</p>
+</aside>
+<ul>
+<li>Without configuration, by default, all pages (or technically all URLs) will require authentication.</li>
+<li>Once you start to explicitly configure the <code>HttpSecurity</code> object inside your own class that is annotated with <code>@EnabledWebSecurity</code>, that (and any other) default disappears.</li>
+<li>Lets protect a page called <code>dashboard</code> using the standard spring security login page.</li>
+</ul>
+<pre><code language="language-java" class="language-java">@Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+        .authorizeRequests(authorizeRequests -&gt;
+            authorizeRequests
+                  .mvcMatchers(&#34;/dashboard&#34;).authenticated()
+                  .anyRequest().denyAll()
+        )
+        .formLogin(formLogin -&gt;
+            formLogin
+                .permitAll()
+        ).logout(logout -&gt;
+             logout
+                .permitAll());
+
+    }
+</code></pre>
+<ul>
+<li><strong>Notice</strong>, the login page and logout page do <strong>not</strong> require authentication.</li>
+<li><strong>Notice</strong>, we have added a final configuration item to <strong>deny</strong> any request which does not match the patterns defined. This is good a security posture.</li>
+</ul>
+<p>Positive: You may notice the above syntax is the newer DSL style. Both that and the old style are valid, see https://spring.io/blog/2019/11/21/spring-security-lambda-dsl to understand the difference.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Protect a range of pages with the default Spring login page" duration="20">
+        <aside class="special"><p>https://docs.spring.io/spring-security/site/docs/current/reference/html5/#servlet-authorization-filtersecurityinterceptor</p>
+</aside>
+<ul>
+<li>Extending the basic config from before, we can now secure all pages in the <code>/users/</code> and <code>/admin/</code> paths, but allow anybody to access the <code>/signup</code> page.</li>
+</ul>
+<pre><code language="language-java" class="language-java">@Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+        .authorizeRequests(authorizeRequests -&gt;
+            authorizeRequests
+                .mvcMatchers(&#34;/dashboard&#34;).authenticated()
+                .mvcMatchers(&#34;/users/**&#34;).authenticated()
+                .mvcMatchers(&#34;/admin/**&#34;).authenticated()
+                .mvcMatchers(&#34;/styles/**&#34;).permitAll()
+                .mvcMatchers(&#34;/signup&#34;).permitAll()
+                .anyRequest().denyAll()
+        )
+        .formLogin(formLogin -&gt;
+            formLogin
+                .permitAll()
+        ).logout(logout -&gt;
+             logout
+                .permitAll());
+
+    }
+</code></pre>
+<ul>
+<li>Therefore <code>/dashboard</code> and anything inside the paths <code>/users/*</code> and <code>/admin/*</code> requires authentication, but <code>/signup</code> does not.</li>
+<li><strong>NOTICE</strong>, we have also added <code>/styles/**</code> to the permitAll list. That is, anything inside your <code>src/main/resources/static/styles</code> folder will be accessible e.g. your CSS files. You would need similar for your JavaScript files etc.  <ul>
+<li>This is useful if you need your style sheets etc. to be usable on pages that do not require authentication e.g. the <code>signup</code> page and the <code>login</code> page.</li>
+</ul>
+</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

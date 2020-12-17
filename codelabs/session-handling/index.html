@@ -1,0 +1,196 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Using Spring Boot Profiles to manage server sessions</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="session-handling"
+                  title="Using Spring Boot Profiles to manage server sessions"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="20">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>How Spring declares parts of the MVC model as being session attributes, and how state can be retained between requests.</li>
+<li>How to use the POST-REDIRECT-GET pattern and how Spring supports the retention of session state.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Understand the goal" duration="0">
+        <p>In web applications, the server needs to retain state between requests.  Since HTTP is inherently stateless, this can be a problem.  Sessions provides a logical way for a server to retain state relevant only to the specific client-server interaction.</p>
+<p>There are problems with sessions.  As the server-side of an application scales, the requests from a client may need to be served by different servers.  To maintain the session, it needs to remain ‘sticky&#39; to one server or the session needs to be available across servers.</p>
+<p>The other problem is that they can get big if too much data is stored in the session.  As they stick around until the session times out (~ 30 minutes) the sessions will consume memory which can then cause performance issues or worse.</p>
+<p>Ideally, try to minimise the amount of work done on a session and, if you can, clean up the session when safe to do so.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Populating the model" duration="0">
+        <p>We&#39;ve already seen that objects can be added to the model using:</p>
+<pre><code>model.addAttribute(&#34;key&#34;, anObject);
+</code></pre>
+<p>We can also tell Spring to ensure that an object is on the model for every request.</p>
+<p>This is done by using the <code>@ModelAttribute</code> annotation on a method within a controller component.</p>
+<p>In our example, we are going to add a List of String objects to our model.  We&#39;ll record the names that we see in this list and we&#39;ll react different to new names than we do to names that we&#39;ve seen before.  If we see a new name, we&#39;ll log &#34;You&#39;re very welcome&#34; and if we&#39;ve seen the name before, we&#39;ll log &#34;Welcome back&#34;.</p>
+<p>Add this method to your controller:</p>
+<pre><code>@ModelAttribute(&#34;names&#34;)
+public List&lt;String&gt; names() {
+  return new ArrayList&lt;String&gt;();
+}
+</code></pre>
+<p>With this method in place, every request will now have a &#34;names&#34; list in place.  If it doesn&#39;t exist, it will be created using this method.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Make sure the new model attribute is available in the method" duration="0">
+        <p>We need to ask Spring to provide the attributes that we need as parameters on the method.</p>
+<aside class="special"><p>NOTE: the controller doesn&#39;t define a field to hold the list of names.  That&#39;s because, by default, controllers are singletons.  There is only one instance per server and therefore, we don&#39;t want the list of names shared across sessions.</p>
+</aside>
+<p>Change the <code>GetMapping</code> method to:</p>
+<pre><code>@GetMapping(&#34;post-greeting/{type}&#34;)
+  public String sayHello(@PathVariable(name = &#34;type&#34;, required = false) Optional&lt;String&gt; type,
+                         @RequestParam(value = &#34;name&#34;, defaultValue = &#34;CM6713&#34;) String aName,
+                         @ModelAttribute(&#34;names&#34;) List&lt;String&gt; names,
+                         Model model) {
+
+
+    Optional&lt;Greeting&gt; aGreeting = theGreetingMaker.makeGreeting(aName, type);
+
+    if (names.contains(aName)) {
+      System.out.println(&#34;Welcome back&#34;);
+    } else {
+      System.out.println(&#34;You&#39;re very welcome.&#34;);
+      names.add(aName);
+    }
+
+    System.out.println(&#34;List of members: &#34; + names);
+
+
+    if (aGreeting.isPresent()) {
+      Greeting theGreeting = aGreeting.get();
+      GreetingValue greetingValue = new GreetingValue(theGreeting.getName(), theGreeting.getMessage());
+
+      model.addAttribute(&#34;greeting&#34;, greetingValue);
+    } else {
+      return missingGreetingType();
+    }
+
+    return &#34;hello&#34;;
+  }
+</code></pre>
+<p>We have a <code>@ModelAttribute</code> parameter in the list of parameters.  Spring will provide this.  We then use <code>names</code> to check whether the session has seen the name before.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Tell Spring to put this attribute on the sessions" duration="0">
+        <p>The last thing we need to do is to tell Spring to store this attribute on the session.</p>
+<p>We do this by annotating the class and specifying which atttributes should go onto the session.</p>
+<pre><code>@Controller
+@SessionAttributes(names = {&#34;names&#34;})
+public class ExampleController {
+</code></pre>
+<p>The <code>@SessionAttributes</code> annotation takes an array of Strings that match to the keys in the model.</p>
+<p>With this in place, Spring now knows that, when the method is called it should check the session for the &#34;names&#34; parameter.  It is exists it will provide it.  If not, it will use the <code>@ModelAttribute</code> method to initialise the list.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test the GET request" duration="0">
+        <p>At this point, we can test the code using <code>post-greeting/informal?name=carl</code> and similar patterns.</p>
+<p>Try repeating the name and then changing it.  You should see different messages in the console.</p>
+<p>Try using more than browser and use different names.  What do you see in the console?  Is the list different for each browser?</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add POST request supports" duration="0">
+        <p>To make sessions work with POST requests, we need to introduce the concept of ‘RedirectAttributes&#39; because we are going to use the POST-REDIRECT-GET pattern.</p>
+<h2 is-upgraded>POST-REDIRECT-GET pattern</h2>
+<p>Rather than return a template directly from a POST request, we prefer to redirect the browser to a GET request.  This is reduce the risk of a repeated submission of a POST.  This is risky (think duplicate order or duplicate payment).</p>
+<p>The pattern is nicely illustrated at <a href="https://en.wikipedia.org/wiki/Post/Redirect/Get" target="_blank">Wikipedia</a>.</p>
+<h2 is-upgraded>Add redirect attributes to the controller</h2>
+<pre><code>//..
+@PostMapping(&#34;get-greeting&#34;)
+public String handleGreetingForm(@Valid @ModelAttribute(&#34;greeting&#34;) GreetingForm aForm,
+                                 @ModelAttribute(&#34;names&#34;) List&lt;String&gt; names,
+                                 RedirectAttributes attributes,
+                                 BindingResult bindings,
+                                 Model model)
+//..
+</code></pre>
+<p>Notice the new parameter <code>attributes</code>.</p>
+<p>Spring will provide this for us.</p>
+<p>Just before we do the redirect (which we do on success), we want to put the name into the RedirectAttributes so that the next method receives it when the GET is processed.</p>
+<pre><code>//..
+else {
+      attributes.addFlashAttribute(&#34;names&#34;, names);
+      return &#34;redirect:post-greeting/&#34; + aForm.getType().get() + &#34;?name=&#34; + aForm.getName();
+    }
+//..
+</code></pre>
+<p><code>java<br>attributes.addFlashAttribute(&#34;names&#34;, names)</code><br> is the line that adds the item to the list of attributes.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test the form" duration="0">
+        <p>Now test using the form that can be found at <code>get-greeting</code>.  Again, the session should be populated.</p>
+<p>Try the same tests as before and observe the behaviour.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Experiments" duration="0">
+        <p>Try commenting out the <code>@SessionAttributes</code> annotation and re-run the server.  Observe the behaviour.</p>
+<p>Try adding some <code>System.out.println</code> lines to the code to see what gets called where.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="0">
+        <p>Spring supports sessions in a number of ways.  @SessionAttributes is a declarative way of identifying parts of the model that need to be retained between requests.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="To think about" duration="0">
+        <ul>
+<li>Look up how to explicitly flush the session</li>
+<li>Some web journeys need sessions, some don&#39;t.  Is this a good reason for having separate controller for different groups of routes?</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

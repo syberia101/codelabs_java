@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-10-06T16:38:42+01:00",
+  "id": "running-Spring-Boot",
+  "duration": 2,
+  "title": "Running Spring Boot",
+  "authors": "Carl Jones",
+  "summary": "Running Spring Boot",
+  "source": "running-spring-boot.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "running-Spring-Boot"
+}

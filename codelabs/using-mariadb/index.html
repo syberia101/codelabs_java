@@ -1,0 +1,83 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Configure the application to use MariaDB</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="using-mariadb"
+                  title="Configure the application to use MariaDB"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="10">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>How to change the application configuration to use MariaDB as the database</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Understand the goal" duration="0">
+        <p>We want to change the application to use MariaDB.  Importantly, we want to do this with only configuration.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add MariaDB support to the application" duration="0">
+        <ul>
+<li>Add MariaDB to <code>build.gradle</code></li>
+</ul>
+<pre><code>runtime &#39;org.mariadb.jdbc:mariadb-java-client:2.7.0&#39;
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Change the database properties to match database" duration="0">
+        <ul>
+<li>Add the database properties.  The properties are the URL to the database (including the schema name), and the credentials.  For production databases, you would want to consider other ways of managing the credentials.<pre><code>spring.datasource.url=jdbc:mariadb://localhost:3306/greetings
+spring.datasource.username=root
+spring.datasource.password=comsc
+</code></pre>
+</li>
+</ul>
+<p>In this example, the database is on the same machine as the Spring Boot server, listening on the default port (3306) and the schema name is ‘greetings&#39;.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Database initialisation" duration="0">
+        <p>The database initialisation scripts will not be run, so you need to create the database and initialise it externally.</p>
+<p>You can alter this behaviour using properties. See <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto-initialize-a-database-using-spring-jdbc" target="_blank">Spring Boot documentation</a> for details.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

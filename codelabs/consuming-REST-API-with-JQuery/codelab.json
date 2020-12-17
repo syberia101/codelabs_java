@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-10-14T08:48:48+01:00",
+  "id": "consuming-REST-API-with-JQuery",
+  "duration": 10,
+  "title": "Consuming a RESTful API with JQuery",
+  "authors": "Carl Jones",
+  "summary": "Consuming a REST API with JQuery",
+  "source": "consuming-an-api.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "consuming-REST-API-with-JQuery"
+}

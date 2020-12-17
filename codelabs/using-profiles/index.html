@@ -1,0 +1,144 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Using Spring Boot Profiles to support multiple databases</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="using-profiles"
+                  title="Using Spring Boot Profiles to support multiple databases"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="20">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>How to use Spring Boot profiles to vary the database on different environments</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Understand the goal" duration="0">
+        <p>We want to enable our application to communicate with different databases in different environments.</p>
+<p>We may want to the use the repeatability and speed of H2 when developing and testing, but MariaDB when moving closer to the production environment.</p>
+<p>This tutorial will only cover the support of different database connection properties, but profiles can vary the code as well.  This might be useful where the functionality of H2 and MariaDB vary and the application has to do more work in one environment than the other.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Split the application.properties" duration="0">
+        <p>The first thing we need to do is split the properties into those which are common across all environments, and those that may be specific to each environment.</p>
+<h2 is-upgraded>Leave common properties in application.properties</h2>
+<p>In our case, we are going to assume that the server port is to be the same on all environments.</p>
+<pre><code>server.port=9090
+</code></pre>
+<h2 is-upgraded>Put H2 connection details into application-dev.properties</h2>
+<p>We create a new file called <code>application-dev.properties</code>.  This implicitly creates a profile called ‘dev&#39;.</p>
+<p>We put the H2 database connection properties into this file.</p>
+<pre><code>###  H2 Settings
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.username=sa
+spring.datasource.password=password
+</code></pre>
+<h2 is-upgraded>Put MariaDB connection details into application-prod.properties</h2>
+<p>Similarly, we create a new file called <code>application-prod.properties</code>.  This implicitly creates a profile called ‘prod&#39;.</p>
+<p>We put the MariaDB database connection properties into this file.</p>
+<pre><code>###  MariaDB Settings
+
+spring.datasource.url=jdbc:mariadb://localhost:3306/greetings
+spring.datasource.username=root
+spring.datasource.password=comsc
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Update build.gradle to provide tasks for each environments" duration="0">
+        <p>We would like to be able to run a Gradle task that starts the application in a specific profile.  To do this, we add some task configuration to <code>build.gradle</code>.</p>
+<pre><code>tasks.bootRun.configure {
+    systemProperty(&#34;spring.profiles.active&#34;, &#34;dev&#34;)
+}
+
+tasks.register(&#34;bootRunProd&#34;) {
+    group = &#34;application&#34;
+    description = &#34;Runs the Spring Boot application with the prod profile&#34;
+    doFirst {
+        tasks.bootRun.configure {
+            systemProperty(&#34;spring.profiles.active&#34;, &#34;prod&#34;)
+        }
+    }
+    finalizedBy(&#34;bootRun&#34;)
+}
+</code></pre>
+<p>The first <code>tasks</code> configuration changes the default ‘bootrun&#39; task so that it uses the ‘dev&#39; profile.</p>
+<p>The second <code>tasks</code> configuration registers a new Gradle task called ‘bootRunProd&#39; which will call ‘bootRun&#39;, but first changes the profile to ‘prod&#39;.</p>
+<p>We can then run the application in different profiles by running the different tasks.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test the application in both modes" duration="0">
+        <p>Run the application in ‘prod&#39; mode and add some Greetings.  You will see the data go into the MariaDB table (using MySQL Workbench maybe).</p>
+<p>Stop the application and run it in ‘dev&#39; mode.  You won&#39;t see the greetings that you&#39;ve added because the development database is in-memory and refreshed on every application start.</p>
+<p>Test the application.</p>
+<p>Now, stop the application and restart in ‘prod&#39; profile.  Without adding new greetings, go to <code>/greetings</code> and observe that the previous greetings still show.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Using profiles from the command line" duration="0">
+        <p>You can use Spring Boot profiles from the command line as well.  If you build your application (using <code>gradle build</code> or <code>gradle assemble</code>) you will get an executable JAR file in <code>/build/libs</code>.  Let&#39;s assume this Jar file is called <code>app.jar</code>.</p>
+<p>Open a command line, and navigate to this folder.</p>
+<p>Run the following command:</p>
+<pre><code>java -jar app.jar --spring.profiles.active=dev
+</code></pre>
+<p>or</p>
+<pre><code>java -jar app.jar --spring.profiles.active=prod
+</code></pre>
+<p>depending on the profile that you want to run.</p>
+<aside class="special"><p>This is how I will run your assessment.  I will run from the command line, so you will need to tell me which profile to run with.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Using Profiles to vary code" duration="0">
+        <p>You can also use profiles to select components.</p>
+<p>Add <code>@Profile(&#34;dev&#34;)</code> (at class level) to tell Spring Boot that a component should only be included when running in ‘dev&#39; profile.</p>
+<p>For example, you may end up with something like this:</p>
+<pre><code>@Component
+@Profile(&#34;dev&#34;)
+public class DefaultGreetingMaker implements GreetingMaker {
+</code></pre>
+<p>See <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-profiles" target="_blank">the Spring Boot documentation</a> for more details.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-10-07T11:00:35+01:00",
+  "id": "adding-dynamic-content-to-Spring-Boot",
+  "duration": 5,
+  "title": "Adding Dynamic Content",
+  "authors": "Carl Jones",
+  "summary": "Adding dynamic content to a Spring Boot Application",
+  "source": "adding-dynamic-content.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "adding-dynamic-content-to-Spring-Boot"
+}

@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-10-31T11:47:47Z",
+  "id": "use-jdbc-to-persist-data",
+  "duration": 60,
+  "title": "Use JDBC to persist data to a relational database",
+  "authors": "Carl Jones",
+  "summary": "Use JDBC to save data to a relational database",
+  "source": "use-jdbc-to-persist-data.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "week 4"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "use-jdbc-to-persist-data"
+}

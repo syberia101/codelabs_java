@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-11-25T11:26:38Z",
+  "id": "spring-security-csp",
+  "duration": 62,
+  "title": "Spring Security Content Security Policy",
+  "authors": "Phil Smart",
+  "summary": "Spring Security Content Security Policy",
+  "source": "spring-security-csp.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "cyber-security"
+  ],
+  "tags": [
+    "spring-security"
+  ],
+  "url": "spring-security-csp"
+}

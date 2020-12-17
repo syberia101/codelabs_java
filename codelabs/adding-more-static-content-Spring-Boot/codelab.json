@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-10-07T09:32:43+01:00",
+  "id": "adding-more-static-content-Spring-Boot",
+  "duration": 5,
+  "title": "Adding Static Content to a Spring Boot Application",
+  "authors": "Carl Jones",
+  "summary": "Adding More Static Content to a Spring Boot Application",
+  "source": "adding-more-static-content.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "adding-more-static-content-Spring-Boot"
+}

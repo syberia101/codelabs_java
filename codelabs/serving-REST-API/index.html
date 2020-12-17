@@ -1,0 +1,141 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Serving a RESTful API</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="serving-REST-API"
+                  title="Serving a RESTful API"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="10">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>How to write an API using the RestController</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Understand the goal" duration="0">
+        <p>We want to explore another role of an application server and that is to serve API requests.</p>
+<p>An API serves data rather than content.  The API can be consumed by another process and the data used directly to fulfil another requirement and/or to populate a user interface.</p>
+<p>APIs can service many different clients though sometimes they are better optimised to a certain client.</p>
+<h2 is-upgraded>Context</h2>
+<p><a href="https://samnewman.io/patterns/architectural/bff/" target="_blank">The Back-end for Front-end pattern</a></p>
+<p>Watch <a href="https://www.youtube.com/watch?v=Bw1dgUS27uE" target="_blank">The Browser is Dead</a></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add the controller" duration="0">
+        <h2 is-upgraded>Create a package</h2>
+<p>First of all, we&#39;re going to create a new package for our API handlers.</p>
+<ul>
+<li>Create a package &#34;api&#34; that is parallel with the package where your previous controllers reside.<br><br><ul>
+<li>e.g. if the previous controllers are in a.b.c.web, create a package a.b.c.api.</li>
+</ul>
+</li>
+</ul>
+<h2 is-upgraded>Create a class</h2>
+<p>Create a class called <code>ExampleApi</code></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Annotate the classes" duration="0">
+        <p>Add two annotations; <code>@RestController</code> and <code>@RequestMapping(&#34;api&#34;)</code></p>
+<pre><code>//...
+@RestController
+@RequestMapping(&#34;api&#34;)
+public class ExampleApi {
+//...
+}
+</code></pre>
+<p>These annotations tell Spring that this component is a <code>@RestController</code>.</p>
+<p>A <code>@RestController</code> returns its results directly on the response rather than forwarding to a view.</p>
+<p>The <code>@RequestMapping</code> annotation tells Spring that all routes to the mapped methods in this class should start with &#34;api&#34;.</p>
+<p>e.g. <code>localhost:8080/api/~~~~</code></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add a method and map it" duration="0">
+        <p>Now we add a method to handle a request for a default greeting.</p>
+<p>The body of the response should be a Greeting object in JSON format, but we also need to return the HTTP status code.</p>
+<p>So, we use a <code>ResponseEntity</code> object and using generics, we specify the type of the object that will form the body.</p>
+<p>The full method looks like:</p>
+<pre><code>@GetMapping(&#34;greet&#34;)
+ public ResponseEntity&lt;GreetingApiData&gt; getGreeting() {
+   GreetingApiData greeting = new GreetingApiData(&#34;Marvin&#34;, &#34;Hello&#34;);
+   return ResponseEntity.ok(greeting);
+}
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Serve the change" duration="0">
+        <p>As before, if you have your server running with bootrun, you can just run the gradle &gt; build &gt; classes task to reload the server.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test the APIs" duration="0">
+        <p>Go to a browser and browse to <code>localhost:8080/api/greet</code>.</p>
+<p>You should see</p>
+<pre><code>{&#34;name&#34;:&#34;Marvin&#34;,&#34;message&#34;:&#34;Hello&#34;}
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Write an automated tests" duration="0">
+        <p>The MockMvc approach works equally well for REST responses.</p>
+<p>The assertions now check for JSON data rather than HTML elements.</p>
+<p>The HTTP status code is more important given their significance in REST.</p>
+<p>Spring Boot integrates a number of options for writing assertions on JSON data.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review" duration="0">
+        <p>In this tutorial, we have created a very simple RESTful API.</p>
+<p>The features of controllers for handling query strings and path variables are all useable with REST.</p>
+<p>It is important that you read up on the rules of REST APIs and in particular the use of HTTP verbs and HTTP status code.</p>
+<h2 is-upgraded>Context</h2>
+<p><a href="[https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm" target="_blank">Roy Fielding&#39;s dissertation</a></p>
+<p><a href="[https://www.mulesoft.com/resources/api/what-is-rest-api-design" target="_blank">Mulesoft Guide to REST APIs</a></p>
+<p><a href="https://www.redhat.com/en/topics/api/what-is-a-rest-api" target="_blank">Red Hat on REST APIs</a></p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

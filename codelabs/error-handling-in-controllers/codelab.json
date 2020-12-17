@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-10-07T14:51:56+01:00",
+  "id": "error-handling-in-controllers",
+  "duration": 10,
+  "title": "Error Handling in Spring MVC",
+  "authors": "Carl Jones",
+  "summary": "Adding Error Handling",
+  "source": "adding-error-handling.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "error-handling-in-controllers"
+}

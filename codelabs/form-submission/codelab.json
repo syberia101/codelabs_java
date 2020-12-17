@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-10-20T15:22:33+01:00",
+  "id": "form-submission",
+  "duration": 30,
+  "title": "Handling Form Submission",
+  "authors": "Carl Jones",
+  "summary": "Handling Form Submission",
+  "source": "form-submission.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "form-submission"
+}

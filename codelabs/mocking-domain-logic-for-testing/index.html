@@ -1,0 +1,121 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Mocking Domain Logic for testing</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="mocking-domain-logic-for-testing"
+                  title="Mocking Domain Logic for testing"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="15">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>How to keep using MockMvc tests when the domain layers aren&#39;t configured</li>
+<li>Using Mocks to provide suitable component implementations</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Understand the goal" duration="0">
+        <p>Our tests started failing when we split the code into components.  This is because MockMvc tests only configure the controller components into the container.  We want to keep using MockMvc tests because they are generally faster to run so we need a way of including the domain components (or at least their behaviour).</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Define a MockBean" duration="0">
+        <p>Our controller needs a component that implements an interface.  In the test, let&#39;s define a MockBean whose type is that of the required interface.</p>
+<pre><code>@AutoConfigureMockMvc
+@ContextConfiguration(classes = {ExampleController.class})
+@WebMvcTest
+public class GreetingsTests {
+
+  @Autowired
+  private MockMvc mockMvc;
+
+/**
+New declaration below...
+*/
+
+  @MockBean
+  private GreetingMaker theGreetingMaker;
+</code></pre>
+<p>The new annotation declares a mock bean that can be given &#34;expectations&#34; in the test methods.  An expectation is a definition of expected behaviour.</p>
+<p>For example, a mock bean implementing factorials would be expected to return 6 when called with parameter 3, and 120 when called with parameter 5.  If we called the mock with parameter 2, it wouldn&#39;t know how to respond.</p>
+<p>This allows us to configure just enough behaviour for the test that we want to conduct.  So, if we were testing that the controller returned &#34;</p>
+<p>The factorial of 5 is 120</p>
+<p>&#34; we only need the mock to handle 5.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Define the behaviour in a test" duration="0">
+        <p>To define an expectation, we use a when-thenReturn pattern (not a million miles from BDD).</p>
+<pre><code>//...
+@Test
+ public void shouldGetInformalGreeting() throws Exception {
+
+   when(theGreetingMaker.determineGreetingWithTime(&#34;CM6713&#34;, Optional.of(&#34;informal&#34;)))
+           .thenReturn(Optional.of(new Greeting(&#34;CM6713&#34;, &#34;Hi... 25/12/2020 00:00:00AM&#34;)));
+
+
+   this.mockMvc
+           .perform(get(&#34;/greet/informal&#34;))
+           .andDo(print())
+           .andExpect(status().isOk())
+           .andExpect(content().string(containsString(&#34;CM6713&#34;)))
+           .andExpect(content().string(containsString(&#34;Hi...&#34;)));
+ }
+ //...
+</code></pre>
+<p>In this case, we need the component to return the default name and an Optional object containing a Greeting object starting &#34;Hi&#34;.  Note that we have to get the parameter values in the &#34;when&#34; correct.  If the mock doesn&#39;t get those values, it won&#39;t return the desired response.</p>
+<p>The controller will use the mock and therefore, because we know the expected response from the mock, we can anticipate and test the output of the controller.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run the GreetingsTests" duration="0">
+        <p>Use gradle &gt; tasks &gt; build &gt; build to build the code (including running the tests).</p>
+<ul>
+<li>The tests should now pass.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review" duration="0">
+        <p>We have learnt how to mock a dependency.  This pattern can be repeated at any layer and many times.  For example, if were to need to take credit card payments, you might want to provide your own mock implementation (or ask the service provider if they offer one).  Similarly, you might want to mock a database or a message broker to avoid costly network traffic slowing down your tests.</p>
+<p>However, there is a case for wanting to use the real components and writing tests that load the full context will be the subject of a future tutorial.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

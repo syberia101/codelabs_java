@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-11-18T16:40:05Z",
+  "id": "structurizr",
+  "duration": 45,
+  "title": "Using Structurizr to document architecture as code",
+  "authors": "Carl Jones",
+  "summary": "Documenting architecture as code",
+  "source": "structurizr.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "structurizr"
+}

@@ -1,0 +1,97 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Spring Security Basic Setup</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="spring-security-setup"
+                  title="Spring Security Basic Setup"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul>
+<li>How to add Spring Security to an existing Spring Boot project</li>
+<li>How to add the Thymeleaf Spring Security extras to an existing Spring Boot Project</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Enabling Spring Security" duration="10">
+        <aside class="special"><p>Reference: https://spring.io/guides/gs/securing-web/</p>
+</aside>
+<ul>
+<li>Add the following Spring Security starter dependency to your <code>build.gradle</code> file</li>
+</ul>
+<pre><code language="language-xml" class="language-xml">dependencies {
+	...
+	implementation &#39;org.springframework.boot:spring-boot-starter-security&#39;
+}
+</code></pre>
+<ul>
+<li>Restart your application. You will see ALL HTTP endpoints are protected with a basic login page by default.</li>
+<li>The default username is <code>user</code> and the default password is printed to the console e.g.</li>
+</ul>
+<pre><code language="language-java" class="language-java">2020-11-18 21:26:09.144  INFO 33929 --- [main] .s.s.UserDetailsServiceAutoConfiguration :  Using generated security password: 9d3593b1-ce46-4de5-895f-abce86bb878c
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add the Thymeleaf Spring Security Dialect" duration="5">
+        <aside class="special"><p>Reference: https://github.com/thymeleaf/thymeleaf-extras-springsecurity</p>
+</aside>
+<ul>
+<li>Integrate Thymeleaf and Spring Security such that you can use security related expressions in Thymeleaf templates.  <ul>
+<li>Add the following dependency to your <code>build.gradle</code> file:</li>
+</ul>
+</li>
+</ul>
+<pre><code language="language-xml" class="language-xml">dependencies {
+	...
+  compile group: &#39;org.thymeleaf.extras&#39;, name: &#39;thymeleaf-extras-springsecurity5&#39;
+}
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="What&#39;s next" duration="2">
+        <ul>
+<li>Configure Spring Security</li>
+<li>Use Spring Security related expressions in Thymeleaf</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

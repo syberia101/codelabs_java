@@ -1,0 +1,172 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Handling Form Submission</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="form-submission"
+                  title="Handling Form Submission"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="30">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>How to consume a form posted from a browser to the server</li>
+<li>How Spring Boot maps the form elements to an object</li>
+<li>How Spring Boot can validate the input</li>
+<li>How Spring Boot captures errors</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Understand the goal" duration="0">
+        <p>Handling user input is a common requirement and handling a form submission is a common way of implementing user input.  In this tutorial, we will look at different ways in which this can be implemented (from the simple to the more complicated).</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Submit a plain HTML Form" duration="0">
+        <p>First of all, we are going to handle form submission from a plain HTML form.  This code can be found at tag <code>plain-HTML-form</code> in the Spring Boot examples.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Write a plain HTML form" duration="0">
+        <p>In the static folder, create a new HTML file called <code>greeting-form.html</code>.  The body element should contain this form element.</p>
+<pre><code>&lt;form action=&#34;/greetingRequest&#34; method=&#34;post&#34;&gt;
+    &lt;label for=&#34;name&#34;&gt;Name:&lt;/label&gt;
+    &lt;input id=&#34;name&#34; name=&#34;name&#34; type=&#34;text&#34;/&gt;&lt;br&gt;
+    &lt;label for=&#34;formal&#34;&gt;Formal greeting?&lt;/label&gt;
+    &lt;input checked id=&#34;formal&#34; name=&#34;type&#34; type=&#34;radio&#34; value=&#34;formal&#34;&gt;
+    &lt;br&gt;
+    &lt;label for=&#34;informal&#34;&gt;Informal greeting?&lt;/label&gt;
+    &lt;input id=&#34;informal&#34; name=&#34;type&#34; type=&#34;radio&#34; value=&#34;informal&#34;/&gt;
+    &lt;br&gt;
+    &lt;input id=&#34;submit&#34; name=&#34;submit&#34; type=&#34;submit&#34; value=&#34;Submit&#34;/&gt;
+&lt;/form&gt;
+</code></pre>
+<p>There are no Thymeleaf attributes in this form.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Write a controller method to handle the POST" duration="0">
+        <p>Let&#39;s write the simplest possible controller method.  We&#39;ll receive the form, and redirect to another request passing the parameters as path variables and/or query parameters.</p>
+<pre><code>@PostMapping(&#34;greetingRequest&#34;)
+ public String handleGreetingForm(GreetingForm aForm, Model model) {
+   return &#34;redirect:greet/&#34; + aForm.getType() + &#34;?name=&#34; + aForm.getName();
+ }
+</code></pre>
+<h2 is-upgraded>Things to note</h2>
+<p>We are using a new annotation here; <code>java @PostMapping</code>.</p>
+<p>The parameters on the method are a <code>GreetingForm</code> object - the class of which we need to write - and the model.  Like other controllers, the string that we pass back is the name of the template or a web directive (e.g. a redirect).</p>
+<p>The <code>GreetingForm</code> class looks like this:</p>
+<pre><code>//...
+@Data
+public class GreetingForm {
+  private String name;
+  private String type;
+}
+//...
+</code></pre>
+<p>What&#39;s important to notice here is that the HTML form element names match the field names on the form class.  Again, this is convention-over-configuration.  Spring Boot will map the HTML request into a form object so when the start writing code, we already have the data in an object form.</p>
+<h2 is-upgraded>Add a route</h2>
+<p>To complete this exercise and test it, you need to add a route to the router.  Map &#34;greeting-form&#34; to &#34;greeting-form.html&#34;.</p>
+<pre><code>registry.addViewController(&#34;/greeting-form&#34;).setViewName(&#34;forward:/greeting-form.html&#34;);
+
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run and test the code" duration="0">
+        <p>Run the server and open the new form in a browser (i.e. go to localhost:8080/greeting-form).</p>
+<p>Enter some data and observe the behaviour.  Try changing field names and observe what happens.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add validation" duration="0">
+        <p>We now want to validate the input data.  This code can be found at tag <code>validate-HTML-form-validation</code> in the Spring Boot examples.</p>
+<h2 is-upgraded>Add validation annotation to the GreetingForm</h2>
+<p>We want to prevent the entry of a blank name into the form.</p>
+<p>Amend the GreetingForm class...</p>
+<pre><code>import javax.validation.constraints.NotBlank;
+
+@Data
+public class GreetingForm {
+
+  @NotBlank
+  private String name;
+  private String type;
+}
+</code></pre>
+<p>Notice the new annotation.  You will also need to add the validation dependency to build.gradle.</p>
+<p>In the dependencies block, add:</p>
+<pre><code>implementation &#39;org.springframework.boot:spring-boot-starter-validation&#39;
+
+</code></pre>
+<h2 is-upgraded>Enable validation in the controllers</h2>
+<p>We can tell Spring Boot to validate the GreetingForm by adding the <code>java @Valid</code> annotation to the parameter.  We also add the <code>BindingResult</code> object as a parameter.</p>
+<pre><code>@PostMapping(&#34;greetingRequest&#34;)
+  public String handleGreetingForm(@Valid GreetingForm aForm, BindingResult bindings, Model model) {
+
+    if (bindings.hasErrors()) {
+      System.out.println(&#34;Errors:&#34; + bindings.getFieldErrorCount());
+      for (ObjectError oe : bindings.getAllErrors()) {
+        System.out.println(oe);
+      }
+      return &#34;redirect:greeting-form&#34;;
+    } else {
+      return &#34;redirect:greet/&#34; + aForm.getType() + &#34;?name=&#34; + aForm.getName();
+    }
+  }
+</code></pre>
+<p>We can now examine the bindings object to see if there were any errors.  If there are errors, we can iterate through them and print them to the console, then redirect back to the form.</p>
+<h2 is-upgraded>Run and test</h2>
+<p>Recompile your code (gradle &gt; tasks &gt; build &gt; classes) to initiate a server reload, then test with a browser.</p>
+<p>Leave the name field empty and observe the console output.</p>
+<p>You should see output similar to:</p>
+<pre><code>Errors:1
+Field error in object &#39;greetingForm&#39; on field &#39;name&#39;: rejected value []; codes [NotBlank.greetingForm.name,NotBlank.name,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [greetingForm.name,name]; arguments []; default message [name]]; default message [must not be blank]
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review" duration="0">
+        <p>So far, we&#39;ve processed a standard web form containing no Thymeleaf attributes.  We&#39;ve validated the form data and logged the error.  Next, we want to show the errors to the user so we need to convert our static HTML form to a Thymeleaf template.</p>
+<p>There are a number of parts to this change, so we&#39;ll put them in a separate tutorial.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

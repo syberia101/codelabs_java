@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-11-12T15:57:37Z",
+  "id": "session-handling",
+  "duration": 20,
+  "title": "Using Spring Boot Profiles to manage server sessions",
+  "authors": "Carl Jones",
+  "summary": "Using Spring Boot Profiles to manage sessions",
+  "source": "session-handling.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "session-handling"
+}

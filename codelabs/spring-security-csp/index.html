@@ -1,0 +1,186 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Spring Security Content Security Policy</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="spring-security-csp"
+                  title="Spring Security Content Security Policy"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul>
+<li>How to add a simple Content Security Policy using Spring Security</li>
+<li>Where do I add my resources</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="How to add a Content Security Policy" duration="20">
+        <aside class="special"><p>https://docs.spring.io/spring-security/site/docs/current/reference/html5/#headers-csp and https://content-security-policy.com/</p>
+</aside>
+<ul>
+<li>Helps to prevent Cross-site Scripting attacks - or other forms of content injection.</li>
+<li>Is not a guaranteed defence. For example, almost by design you may have to whitelist a resource which later becomes untrustworthy and injects a malicious script onto your site.</li>
+<li>It is not easy to establish a good policy (there is no requirement for it to be watertight for your project).</li>
+<li>This can be achieved by setting the <code>ContentSecurityPolicy</code> header in spring security e.g. extending the example from the previous spring security tutorials.</li>
+</ul>
+<pre><code language="language-Java" class="language-Java">@Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+        .authorizeRequests(authorizeRequests -&gt;
+            authorizeRequests
+                .mvcMatchers(&#34;/dashboard&#34;).authenticated()
+                .mvcMatchers(&#34;/user/**&#34;).hasAnyRole(&#34;USER&#34;,&#34;ADMIN&#34;)
+                .mvcMatchers(&#34;/admin/**&#34;).hasRole(&#34;ADMIN&#34;)
+                .mvcMatchers(&#34;/styles/**&#34;).permitAll()
+                .mvcMatchers(&#34;/signup&#34;).permitAll()
+                .anyRequest().denyAll()
+        )
+        .formLogin(formLogin -&gt;
+            formLogin
+                .permitAll()
+        ).logout(logout -&gt;
+             logout
+                .permitAll())
+        .headers().contentSecurityPolicy(csp -&gt;
+            csp.policyDirectives(&#34;default-src &#39;self&#39;; object-src &#39;self&#39;&#34;)        
+        );       
+    }
+</code></pre>
+<ul>
+<li>This simple (and certainly not a good) policy will prevent any resources (JavaScript, StyleSheets, Images etc) loading from any location other than those hosted on the site&#39;s own origin (see here for help on same-origin and same-site https://web.dev/same-site-same-origin/).  <ul>
+<li>This is unlikely to work well for your site e.g. assuming you take resources from other origins, for instance; bootstrap, fontawesome etc.</li>
+<li>You will need to relax this basic constraint to allow for trusted sources.</li>
+<li>You can test your CSP on sites like: https://csp-evaluator.withgoogle.com/</li>
+</ul>
+</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="How do I get my inline JavaScript working again" duration="3">
+        <ul>
+<li>Problem: I have inline (embedded in the HTML) JavaScript that I want to run, but the basic CSP policy is preventing inline scripts from running. What do I do?</li>
+<li>You have a few options (described on the following pages):  <ul>
+<li>Allow unsafe inline script execution.</li>
+<li>Externalise your JavaScript.</li>
+<li>Whitelist the hash of your inline JavaScript.</li>
+</ul>
+</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Allow unsafe inline script execution" duration="3">
+        <ul>
+<li>Allow unsafe inline script execution e.g. <code>csp.policyDirectives("default-src 'self'; script-src 'unsafe-inline'; object-src 'self'")</code>. However, <strong>do not do this</strong> as you are allowing possibly malicious JavaScript to run if it gets reflected back onto the page.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Externalise your JavaScript" duration="15">
+        <ul>
+<li>Externalise your JavaScript into a <code>.js</code> file served from, for example, your static resource folder. This is then loaded using the  tag. As this will be located on the same origin (so origin is <code>'self'</code>) the browser will load, trust, and execute it.</li>
+<li><strong>Note</strong>, this will disable inline event handlers as well, for instance anything in <code>onclick=""</code> etc. These need to be replaced with <code>addEventListener()</code> calls. For example:</li>
+</ul>
+<pre><code language="language-JavaScript" class="language-JavaScript">  //In your HTML
+  &lt;script&gt;
+      function alertMe(){
+      	window.alert(&#34;hi&#34;);
+      }
+  &lt;/script&gt;
+  &lt;div onclick=&#34;alertMe()&#34;/&gt;
+</code></pre>
+<p>Should be replaced by:</p>
+<pre><code language="language-JavaScript" class="language-JavaScript">  //In your HTML
+ &lt;div id=&#34;clickable-div&#34;/&gt;
+
+ //In your external js file
+ function alertMe(){
+         window.alert(&#34;hi&#34;);
+ }
+ document.addEventListener(&#39;DOMContentLoaded&#39;, function () {
+   document.getElementById(&#39;clickable-div&#39;)
+     .addEventListener(&#39;click&#39;, alertMe);
+ });
+
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Whitelist the hash of your inline JavaScript" duration="20">
+        <ul>
+<li>If you must use inline JavaScript, you can whitelist the hash of the script you want to run.</li>
+<li>Firstly, take the script you want to run, remove the script tags, and canonicalise the text (remove all the formatting e.g. whitespaces etc.). You do not have to do this, but if you do not then the formatting becomes part of the hash, and hence any changes to the format (e.g. you introduce a space) will require the generation of a different hash.  <ul>
+<li><strong>Note</strong>, you can not whitelist the inline event handler e.g. the <code>onclick</code>, so you need to include the event listener in your inline script as well.</li>
+</ul>
+</li>
+<li>For example:</li>
+</ul>
+<pre><code language="language-JavaScript" class="language-JavaScript">   //In the HTML
+   &lt;script&gt;
+   		function alertMe(){
+   		 window.alert(&#34;hi&#34;);
+   		}
+   		document.addEventListener(&#39;DOMContentLoaded&#39;, function () {
+     document.getElementById(&#39;game-container&#39;)
+       .addEventListener(&#39;click&#39;, alertMeExternally);
+   	});
+   &lt;/script&gt;
+</code></pre>
+<p>becomes the ‘string to hash&#39; of:</p>
+<pre><code language="language-javascript" class="language-javascript">   function alertMe(){window.alert(&#34;hi&#34;);}document.addEventListener(&#39;DOMContentLoaded&#39;,function(){document.getElementById(&#39;game-container&#39;).addEventListener(&#39;click&#39;, alertMe);});
+</code></pre>
+<p>which you must also use in your &lt;script&gt; tag (replacing the formatted one in the first snippet):</p>
+<pre><code language="language-JavaScript" class="language-JavaScript">&lt;script&gt;function alertMe(){window.alert(&#34;hi&#34;);}document.addEventListener(&#39;DOMContentLoaded&#39;,function(){document.getElementById(&#39;game-container&#39;).addEventListener(&#39;click&#39;, alertMe);});&lt;/script&gt;
+
+</code></pre>
+<ul>
+<li>Next, compute the sha* hash (as base64) of the ‘string to hash&#39;. For example, a base64 encoded sha256 hash of the above is <code>siPmkQwTblLsYDVnOPqTPEfWGML0dXY0o+SdZF6GGB0</code>. A hash can be generated using various command line tools or websites e.g. https://approsto.com/sha-generator/.</li>
+<li>Add this to the CSP policy as a <code>script-src</code> ; <code>csp.policyDirectives("default-src 'self'; script-src 'sha256-siPmkQwTblLsYDVnOPqTPEfWGML0dXY0o+SdZF6GGB0'; object-src 'self'")</code></li>
+<li>Of benefit:  <ul>
+<li>If an attacker manipulates the script, the hash will not match and the browser will not execute it.</li>
+<li>If an attacker injects their own script, they have no way of adding the hash of it to the CSP headers the browser received from the server, and hence the browser will not execute it.</li>
+</ul>
+</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

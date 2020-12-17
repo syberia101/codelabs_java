@@ -1,0 +1,86 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Running Spring Boot</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="running-Spring-Boot"
+                  title="Running Spring Boot"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="2">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>Running Spring Boot using gradle bootrun</li>
+<li>Running Spring Boot using a terminal</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Running with bootrun" duration="0">
+        <p>In IntelliJ, create a new project as per the &#34;Starting Spring Boot&#34; tutorial.</p>
+<p>In the gradle pane, select Tasks &gt; application &gt; bootRun.</p>
+<p>Double-click on bootRun.</p>
+<p class="image-container"><img alt="Run from Gradle bootrun" src="img\e5cd94aedd0f49d6.png"></p>
+<p>Observe the Run pane.</p>
+<p>You will see Gradle start to run and a set of tasks complete.<br>You will then see a series of log messages.</p>
+<aside class="special"><p>NOTE: No JAR file is created.  To verify this, run Tasks &gt; build &gt; clean.  This will remove the &#34;build&#34; folder (which is where you will find the JAR file under /libs).</p>
+</aside>
+<p>In the log, you will see that a Tomcat server has been started and that<br>the server is now listening on port 8080.  This is the default port.  It can<br>easily be changed using application properties.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Running from the terminal" duration="0">
+        <p>In IntelliJ, create a new project as per the &#34;Starting Spring Boot&#34; tutorial.</p>
+<h2 is-upgraded>Build the JAR file</h2>
+<p>In the gradle pane, select Tasks &gt; build &gt; build.</p>
+<p>This time, we are creating an executable JAR file that we can then run.</p>
+<p>The build process includes the execution of the automated tests.</p>
+<p>To leave out tests (you&#39;ll never do that right!) you run Tasks &gt; build &gt; assemble.</p>
+<h2 is-upgraded>Run the JAR file</h2>
+<p>Open a terminal (either in IntelliJ, the Windows command prompt or git bash).</p>
+<p>Open the ./build/libs directory.  In there, you will find a JAR file.  Let&#39;s<br>assume it&#39;s called app.jar.</p>
+<p>To run this, execute the following in the terminal:</p>
+<pre><code>java -jar app.jar
+</code></pre>
+<p class="image-container"><img alt="log after running from console" src="img\a77c300f9321acc7.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review" duration="0">
+        <p>You have seen two ways to run a Spring Boot project.  When allied with<br>Spring Boot DevTools, you will see how to become a little bit more<br>productive.  Remember, Java is a compiled language so it&#39;s always going to<br>be a bit slower to start than interpreted languages, but you get back<br>the savings of a typed language as type errors will be caught at compile time<br>rather than at run-time.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

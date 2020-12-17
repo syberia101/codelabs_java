@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-10-21T08:02:40+01:00",
+  "id": "form-submission-with-templates",
+  "duration": 30,
+  "title": "Handling Form Submission with a Thymeleaf Template",
+  "authors": "Carl Jones",
+  "summary": "Handling Form Submission With a Template",
+  "source": "form-submission-with-templates.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "form-submission-with-templates"
+}

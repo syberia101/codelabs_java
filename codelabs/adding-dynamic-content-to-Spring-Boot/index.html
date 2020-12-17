@@ -1,0 +1,93 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Adding Dynamic Content</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="adding-dynamic-content-to-Spring-Boot"
+                  title="Adding Dynamic Content"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="5">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>Passing dynamic content</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Amend the controller" duration="0">
+        <p>All we&#39;re going to do in this tutorial is add the ability to show dynamic content.</p>
+<p>Let&#39;s amend the controller.</p>
+<pre><code>import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class ExampleController {
+
+  @GetMapping(&#34;greet&#34;)
+  public String sayHello(Model model) {
+
+        String timedMessage = &#34;Hello...it&#39;s &#34; + LocalDateTime.now().format(DateTimeFormatter.ofPattern(&#34;yyyy-MM-dd HH:mm:ss a&#34;));
+
+        Greeting aGreeting = new Greeting(&#34;CM6213&#34;, timedMessage);
+        model.addAttribute(&#34;greeting&#34;, aGreeting);
+
+    return &#34;hello&#34;;
+  }
+}
+</code></pre>
+<h2 is-upgraded>Set the greeting to include the current time.</h2>
+<p>Rather than pass a static greeting, we&#39;re going to provide a timestamp with it.</p>
+<p>Nothing else has changed.  The view will still show what it is passed because there<br>is no change to the objects being passed via the model.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test" duration="0">
+        <p>To test this, run gradle &gt; build &gt; classes again and then go to http://localhost:8080/greet.</p>
+<p>Do this a number of times to see the time change.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review" duration="0">
+        <p>In this tutorial, we&#39;ve introduced the notion of dynamic content.</p>
+<p>Each request can now return dynamic data which moves us from web sites to web applications.</p>
+<p>At the moment, we are generated the view on the server-side and only asking the browser to render the HTML.</p>
+<h2 is-upgraded>APIs</h2>
+<p>Spring Boot is moving more and more towards being a framework for APIs where the HTTP response is not HTML, but is typically JSON.<br>We will look at this later, but it may be worth you starting to look at web frameworks such as React.js that consume REST APIs.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

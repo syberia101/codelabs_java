@@ -1,0 +1,134 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Adding Static Content to a Spring Boot Application</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="adding-more-static-content-Spring-Boot"
+                  title="Adding Static Content to a Spring Boot Application"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="5">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>Adding another static files</li>
+<li>Observing the routing behaviour of Spring Boot</li>
+<li>Adding a route</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Adding static content" duration="0">
+        <p>In IntelliJ, build on the previous project where we added an <code>index.html</code> file.</p>
+<p>Add a file called &#34;about-us.html&#34; to the static folder.  You can put any HTML in here that you like.</p>
+<ul>
+<li>Use the reload trick that you learned to add this content.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test the Content" duration="0">
+        <p>Go to http://localhost:8080 in a browser of your choice.</p>
+<p>Go to http://localhost:8080/about-us in a browser of your choice.</p>
+<aside class="warning"><p>This won&#39;t work!</p>
+</aside>
+<p>Go to http://localhost:8080/about-us.html in a browser of your choice.</p>
+<aside class="special"><p>This will work.</p>
+</aside>
+<p>What&#39;s happening here?</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Spring Boot&#39;s routing" duration="0">
+        <p>Spring Boot has a set of conventions.  It was happy to map the index route,<br>but it treats all other HTML files in static as &#34;.html&#34; routes.</p>
+<p>We can get around this.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add a router class" duration="0">
+        <p>We&#39;re now going to add our first application code to Spring Boot.</p>
+<p>Create a new package in your Java code.  Make it a sub-package of the package<br>created when you generated the application.</p>
+<p>For example, in this example, we&#39;ve added the &#34;web&#34; package.</p>
+<p class="image-container"><img alt="Adding a router" src="img\f0018ff658cf84e8.png"></p>
+<p>In that package, add a class called &#34;StaticRouter&#34; and add this code to it (amending the package to suit your own).</p>
+<pre><code>package uk.ac.cf.cm6213.springbootexamples.web;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class StaticRouter implements WebMvcConfigurer {
+
+  @Override
+  public void addViewControllers(ViewControllerRegistry registry) {
+    registry.addViewController(&#34;/about-us&#34;).setViewName(&#34;forward:/about-us.html&#34;);
+  }
+
+}
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Observe the code" duration="0">
+        <p>We can see a few things in this code.</p>
+<ol type="1">
+<li>It uses an annotation <code>@Configuration</code>.  This tells Spring Boot that<br>this is a configuration component.  The annotation tells Spring when to run<br>the code.</li>
+<li>The class implements an interface provided by Spring.  This is another<br>way in which frameworks can provide reusable code.  Essentially, they are saying<br>that if the application developer provides an implementation of this interface, they<br>will call it.</li>
+<li>The interface requires one method to be implemented, and in this method, we map<br>the route &#34;about-us&#34; to the HTML page &#34;about-us.html&#34;.</li>
+</ol>
+<aside class="special"><p>We will also use the term &#34;bean&#34; when referring to Spring components so this is also known as a &#34;Spring Bean&#34;.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Refresh and Test" duration="0">
+        <ul>
+<li>Run the gradle &gt; build &gt; classes task.</li>
+<li>Test &#34;about-us.html&#34;</li>
+<li>Test &#34;about-us&#34; - does it work now?</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review" duration="0">
+        <p>In this tutorial, we&#39;ve added static content and learnt a bit about Spring&#39;s<br>routing rules.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,168 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Getting Started with Spring Boot</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="starting-Spring-Boot"
+                  title="Getting Started with Spring Boot"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="2">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>Using IntelliJ to create a Spring Boot project</li>
+<li>Adding dependencies to the Spring Boot project</li>
+<li>Choosing the right options for the Java SDK, build tool and names</li>
+<li>What the Spring Initializr provides</li>
+<li>Where to find the key features in Spring Boot</li>
+<li>How to run a Spring Boot application</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Pick the right wizard" duration="0">
+        <p>Open IntelliJ and create a new project either from the opening dialog or from File &gt; New.</p>
+<p class="image-container"><img alt="New Project Dialog Step 1" src="img\a42f67d9dbe8d028.png"></p>
+<p>Select the Spring Initializr option.  Notice how it offers you the choice of https://start.spring.io or Custom.</p>
+<p>Try going to that website in a browser.  It is the same tool in web form.</p>
+<p>Pick a Java SDK.  Choose the version of 11 installed on your machine.</p>
+<p>Then click &#34;Next&#34;.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Choose the project settings" duration="0">
+        <p>In this step, you will set the artifact group and id, and select a number of other options.</p>
+<h2 is-upgraded>Group and artifact</h2>
+<p>This is the identifier for the artifact produced by the project.  If you wanted to publish the<br>packaged jar file to a repository for others to use (say the Maven repository), the group and artifact id<br>form the name of that artifact.  This will make more sense when you see the Gradle file that is produced.</p>
+<h2 is-upgraded>Build type</h2>
+<p>You choose to use Maven or Gradle as the build tool.  We will use Gradle in our examples as the<br>build file is more readable.  It is worth learning the basics of Maven as many examples will use it.</p>
+<h2 is-upgraded>Language</h2>
+<p>Spring Boot supports multiple JVM-based languages.  We will stick with Java.</p>
+<h2 is-upgraded>Packaging</h2>
+<p>Traditionally, Java enterprise applications have been packaged as WAR files and<br>then deployed into an application server (such as Apache Tomcat).  Spring Boot<br>and other modern frameworks turn that inside out and embed the server within an<br>executable JAR file.</p>
+<p>We will use JAR packaging as standard.</p>
+<h2 is-upgraded>Java version</h2>
+<p>We&#39;ve already selected a Java SDK version 11 so pick version 11.</p>
+<p class="image-container"><img alt="New Project Dialog Step 2" src="img\4bf55274224e6c2b.png"></p>
+<p>Click &#34;Next&#34;.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add dependencies" duration="0">
+        <p>First of all, choose the last fully released version of Spring Boot.  Do not<br>pick milestone (M*) or Snapshot versions.  At time of writing, the last<br>production version is 2.3.4.</p>
+<p class="image-container"><img alt="Spring Boot Version" src="img\69980c260e5446fc.png"></p>
+<p>We want our first project to be:</p>
+<ul>
+<li>A web project</li>
+<li>A productive experience</li>
+</ul>
+<h2 is-upgraded>Web dependencies</h2>
+<p>To make this project into a web project, we will add two dependencies:</p>
+<ul>
+<li>Web &gt; Spring Web (this adds Spring MVC capabilities and the Tomcat server)</li>
+<li>Template Engines &gt; Thymeleaf (this add the Thymealeaf server-side templating engine)</li>
+</ul>
+<p>With these dependencies, Spring Boot can listen for web requests, route then to a special<br>type of component known as a controller and return data to a view.  Thymeleaf supports templating<br>and will inject the data into the template.</p>
+<h2 is-upgraded>Productive</h2>
+<p>To make the project development cycle more productive, we will add:</p>
+<ul>
+<li>Developer Tools &gt; Lombok</li>
+<li>Developer Tools &gt; Spring Boot DevTools</li>
+</ul>
+<p>We know what Lombok does.  Spring Boot DevTools allows us to avoid server restarts and supports LiveReload<br>of web pages. We&#39;ll see this in action later.</p>
+<p class="image-container"><img alt="Dependencies" src="img\c3e2806ad442aedb.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Project name and file location" duration="0">
+        <p>On the final step, Spring Boot will use the project name from earlier to<br>default the values.  It is strongly suggested that you DON&#39;T put the<br>code into a OneDrive folder.  Consider making a folder on your C: drive<br>called &#34;Projects&#34; (or similar).  This will keep the path names shorter.</p>
+<p>Use Gitlab to backup your code.</p>
+<p>Normally, you can leave these settings at their default values.</p>
+<p class="image-container"><img alt="File Locations" src="img\b99842dd4c4e7281.png"></p>
+<p>Click &#34;Finish&#34;.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Examine the generated source" duration="0">
+        <p>Let&#39;s have a look at the source code that is generated from this process.<br>You can do this by looking at tag &#34;step-1&#34; in the project at<br><a href="https://git.cardiff.ac.uk/ase-2020/cm6213/springbootexamples" target="_blank">Gitlab project</a></p>
+<h2 is-upgraded>The Java source</h2>
+<p>The tool will generate code in both the src/main and src/test folders.<br>The project structure follows a convention.  It is possible to change this but<br>it requires configuration.  Spring Boot follows a &#34;convention over configuration&#34;<br>approach.  Use the defaults where possible.</p>
+<h3 is-upgraded>The main class</h3>
+<p class="image-container"><img alt="File Locations" src="img\d243c4769704c58c.png"></p>
+<pre><code>package uk.ac.cf.cm6213.springbootexamples;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SpringBootExamplesApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(SpringBootExamplesApplication.class, args);
+  }
+
+}
+</code></pre>
+<p>In this code, we can see the first use of an annotation.</p>
+<pre><code>@SpringBootApplication
+public class SpringBootExamplesApplication {
+</code></pre>
+<p>This tells Spring Boot that this class is the entry point for the application.<br>Note, how the code invokes the class SpringApplication and passes the class of<br>our generated class.  This tells us that we are calling Spring with our own<br>code as a parameter, so that Spring can call it or introspect it.</p>
+<h3 is-upgraded>The test class</h3>
+<p>A simple test class is also created.  This is an empty test, but is enough<br>to test that Spring Boot has loaded correctly as it would fail if the<br>application hasn&#39;t started.</p>
+<h2 is-upgraded>The Gradle source</h2>
+<p>The tool creates an initial build.gradle file.</p>
+<p>Examine the file and notice:</p>
+<ul>
+<li>the dependencies section.  Look back at what we added in the tool earlier.</li>
+<li>the source compatibility</li>
+<li>the Spring Boot version</li>
+</ul>
+<p>Notice also that the tool generates a .gitignore file and the Gradle wrapper<br>files (gradlew, etc).  These files are put into source control.  This means that the<br>version of Gradle required to build the project is bundled with the project.</p>
+<p>This means that a developer can build your code by checking out the project<br>and running</p>
+<pre><code>./gradlew build
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review" duration="0">
+        <p>In this codelab, we have used the Spring Initializr tool to create a first<br>Spring Boot project.  In a subsequent codelab, we will run the project using<br>Gradle and the command line.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

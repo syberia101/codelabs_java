@@ -1,0 +1,41 @@
+{
+  "title": "Spring Boot Codelabs",
+  "description": "A set of short tutorials to accompany the Gitlab projects.",
+  "tags": [],
+  "categories": [],
+  "exclude": [
+    "^lang-.*"
+  ],
+  "logoUrl": "/images/logo.png",
+  "toolbarBgColor": "#37474F",
+  "sort": "mainCategory",
+  "pins": [
+    "starting-Spring-Boot",
+    "running-Spring-Boot",
+    "adding-static-content-Spring-Boot",
+    "adding-more-static-content-Spring-Boot",
+    "adding-templates-and-controller-to-Spring-Boot",
+    "adding-dynamic-content-to-Spring-Boot",
+    "handling-a-request-parameter",
+    "handling-path-variables",
+    "error-handling-in-controllers",
+    "automating-mvc-tests",
+    "serving-REST-API",
+    "consuming-REST-API-with-JQuery",
+    "separating-domain-logic",
+    "mocking-domain-logic-for-testing",
+    "full-container-testing",
+    "form-submission",
+    "form-submission-with-templates",
+    "use-jdbc-to-persist-data",
+    "using-mariadb",
+    "using-profiles",
+    "intro-to-jpa",
+    "session-handling",
+    "structurizr",
+    "spring-security-setup",
+    "spring-security-basic-config",
+    "spring-security-users-authz",
+    "spring-security-csp"
+  ]
+}

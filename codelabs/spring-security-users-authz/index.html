@@ -1,0 +1,114 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Spring Security Test User Setup and Simple Authorisation</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="spring-security-users-authz"
+                  title="Spring Security Test User Setup and Simple Authorisation"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul>
+<li>How to add two in-memory users for testing</li>
+<li>How to restrict pages (URLs) to certain user roles</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="How to add two in-memory users for testing" duration="10">
+        <aside class="special"><p>https://docs.spring.io/spring-security/site/docs/current/reference/html5/#hello-web-security-java-configuration</p>
+</aside>
+<ul>
+<li>In the security configuration class you created in the <code>spring-security-basic-config</code> tutorial, add a <code>UserDetailsService</code> bean that configures an <code>InMemoryUserDetailsManager</code> (technically this bean could exist in any <code>@Configuration</code> class).</li>
+<li>Configure two users for testing; an <code>ADMIN</code> user, and a standard <code>USER</code> user.</li>
+</ul>
+<pre><code language="language-java" class="language-java">	 @Bean
+    public UserDetailsService userDetailsService() {
+            InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+            manager.createUser(User.
+                       withDefaultPasswordEncoder()
+                       .username(&#34;user&#34;)
+                       .password(&#34;password&#34;)
+                       .roles(&#34;USER&#34;)
+                       .build());
+            manager.createUser(User.
+                       withDefaultPasswordEncoder()
+                       .username(&#34;admin&#34;)
+                       .password(&#34;password&#34;)
+                       .roles(&#34;ADMIN&#34;)
+                       .build());
+            return manager;
+    }
+</code></pre>
+<ul>
+<li>You can now login with either user (change the password if you want).</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="How to restrict pages (URLs) to certain user roles" duration="10">
+        <aside class="special"><p>https://docs.spring.io/spring-security/site/docs/current/reference/html5/#servlet-authorization-filtersecurityinterceptor</p>
+</aside>
+<ul>
+<li>Lets leave the <code>dashboard</code> page so it is accessible to <strong>any</strong> authenticated user.</li>
+<li>Lets ensure anybody trying to access anything inside the <code>/admin/</code> path requires the <code>ADMIN</code> role.</li>
+<li>Lets ensure anybody trying to access anything inside the <code>/user/</code> path requires either the <code>USER</code> or <code>ADMIN</code> role.</li>
+</ul>
+<pre><code language="language-java" class="language-java">@Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+        .authorizeRequests(authorizeRequests -&gt;
+            authorizeRequests
+                .mvcMatchers(&#34;/dashboard&#34;).authenticated()
+                .mvcMatchers(&#34;/user/**&#34;).hasAnyRole(&#34;USER&#34;,&#34;ADMIN&#34;)
+                .mvcMatchers(&#34;/admin/**&#34;).hasRole(&#34;ADMIN&#34;)
+                .mvcMatchers(&#34;/styles/**&#34;).permitAll()
+                .mvcMatchers(&#34;/signup&#34;).permitAll()
+                .anyRequest().denyAll()
+        )
+        .formLogin(formLogin -&gt;
+            formLogin
+                .permitAll()
+        ).logout(logout -&gt;
+             logout
+                .permitAll());
+
+    }
+</code></pre>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

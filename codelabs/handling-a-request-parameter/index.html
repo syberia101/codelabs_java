@@ -1,0 +1,92 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Handling a Request Parameter</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="handling-a-request-parameter"
+                  title="Handling a Request Parameter"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="10">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>How to map a request parameter into a Controller</li>
+<li>More about conventions and configuration</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Understand the goal" duration="0">
+        <p>We want to pass the name of the person as a parameter.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Amend the controller" duration="0">
+        <p>Let&#39;s amend the controller.  Add a parameter to the method.</p>
+<pre><code>//code omitted
+public String sayHello(@RequestParam(value = &#34;name&#34;, defaultValue = &#34;CM6713&#34;) String aName, Model model) {
+
+  String timedMessage = &#34;Hello...it&#39;s &#34; + LocalDateTime.now().format(DateTimeFormatter.ofPattern(&#34;yyyy-MM-dd HH:mm:ss a&#34;));
+//code omitted
+  Greeting aGreeting = new Greeting(aName, timedMessage);
+</code></pre>
+<ul>
+<li>The parameter is called <code>aName</code>.</li>
+<li>It is annotated with the <code>@RequestParam</code> annotation<br>** This tells Spring that HTTP param called &#34;name&#34; should be mapped to the &#34;aName&#34; variable...<br>** and that the default value of this parameter (if it&#39;s missing) should be &#34;CM6713&#34;.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test" duration="0">
+        <p>To test this, run gradle &gt; build &gt; classes again and then go to http://localhost:8080/greet.</p>
+<p>You should see the same as before because Spring will play the default value.</p>
+<p>Now, go to http://localhost:8080/greet?name=Patrick</p>
+<p>You should see the name change.</p>
+<p>Try some other tests.  Maybe change the name of the request parameter?</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review" duration="0">
+        <p>In this tutorial, we&#39;ve introduced the notion of a request parameter.</p>
+<p>Why not add some more parameters and really explore how Spring handles it.<br><br>Try passing numbers as parameters.  Can Spring convert the number for you?</p>
+<h2 is-upgraded>Other things to Try</h2>
+<p>Remove the &#34;value=&#34; part from the annotation and re-rest.<br><br>Does it work?</p>
+<p>Change the web URL to ?aName=Patrick.  Remember conventions?</p>
+<p>The value setting is configuration that overrides the convention that the<br>parameter name (in code) matches the query string parameter name.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

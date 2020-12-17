@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-11-10T17:11:47Z",
+  "id": "intro-to-jpa",
+  "duration": 30,
+  "title": "Introduction to Java Persistence Architecture (Spring Data JPA)",
+  "authors": "Carl Jones",
+  "summary": "Introduction to JPA (Java Persistence Architecture)",
+  "source": "introduction-to-jpa.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "intro-to-jpa"
+}

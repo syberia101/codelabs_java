@@ -1,0 +1,388 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Using Structurizr to document architecture as code</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="structurizr"
+                  title="Using Structurizr to document architecture as code"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="45">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>How to set up a workspace on Structurizr</li>
+<li>How to add other users to your workspace</li>
+<li>How to add Structurizr support to your project</li>
+<li>How to document the layers of your code</li>
+<li>How to scan Spring Boot code for components</li>
+<li>How to add your own components to the model</li>
+<li>How to edit the diagram in Structurizr</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Understand the goal" duration="0">
+        <p>Documenting key decisions enables others to understand the reasoning behind your design and how it has evolved over time.</p>
+<p>Your system will be subjected to changing forces over time and it will need to adapt.  The current state may not make sense in isolation, but being able to understand the broader context and the history of how the current state was reached can increase understanding.</p>
+<p>By documenting the model as code, the model is part of the source of the system and should be managed as such (just as much as the application code or the tests).</p>
+<p>At the end of this tutorial, you should be able to view a set of diagrams representing a simple Spring Boot application.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Register with Structurizr" duration="0">
+        <p>Go to <a href="https://structurizr.com/" target="_blank">Structurizr.com</a> and register using your &#34;‘@cardiff.ac.uk&#34;&#39; address.  We have an academic licence based on this email suffix.</p>
+<ul>
+<li>check for any confirmation emails and respond.</li>
+<li>Login to Structurizr</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a workspace" duration="0">
+        <p>Click on &#34;Create a new workspace&#34;.</p>
+<p class="image-container"><img alt="Create Workspace Button" src="img\29c817824991ac4e.png"></p>
+<p>You don&#39;t need to do anymore at this point for an individual workspace.  We will add users to this workspace later so that you can share it in your team.</p>
+<p>Click on your user id (top right) to get back to the list of workspaces.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add Structurizr support to your project" duration="0">
+        <p>We are going to add Structurizr code as part of our test suite.  Therefore, we need Structurizr&#39;s java client library to be on the test classpath.  Add the following lines to your <code>dependencies</code> block.</p>
+<pre><code>testCompile &#39;com.structurizr:structurizr-core:1.6.2&#39;
+testCompile &#39;com.structurizr:structurizr-client:1.6.2&#39;
+testCompile &#39;com.structurizr:structurizr-spring:1.3.5&#39;
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create test class" duration="0">
+        <p>In your test code, create a new Java package.  For example, under <code>uk.ac.cf.cm6213.springbootexamples</code>, create a new package called <code>structurizr</code>.</p>
+<p>In that package, create a new class called &#34;GenerateModel&#34; and create a public method called &#34;generateModel&#34;.  Annotate this new method with <code>@Test</code> (it is standard JUnit test) and add any required imports.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create fields for Structurizr data" duration="0">
+        <p>To use Structurizr from your Java code, you will need to provide some parameters.</p>
+<p>Go back to your workspace, click the &#34;Show more...&#34; button on the right and find the following items:</p>
+<ul>
+<li>The workspace id</li>
+<li>The API key</li>
+<li>The API secret</li>
+</ul>
+<p class="image-container"><img alt="Workspace Attributes" src="img\ad10f7b7ed41edda.png"></p>
+<p>Have these fields at hand (maybe use WIN+V to store them on the clipboard?)</p>
+<p>Create fields in your class for these fields.</p>
+<pre><code>public class GenerateModel {
+
+    private final static int WORKSPACE_ID = &lt;YOUR WORKSPACE&gt;;
+    private final static String API_KEY = &#34;&lt;YOUR API KEY&gt;&#34;;
+    private final static String API_SECRET= &#34;&lt;YOUR API SECRET&gt;&#34;;
+
+    @Test
+       public void generateModel() throws Exception {
+         //...
+
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create workspace and model objects" duration="0">
+        <p>We need to create objects to represent the workspace and the model in code.</p>
+<p>Provide the name of the workspace and a description as parameters.</p>
+<pre><code>Workspace workspace = new Workspace(&#34;Greeting Maker&#34;, &#34;Sample Spring Boot Project&#34;);
+ Model model = workspace.getModel();
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a system context model" duration="0">
+        <p>Now we want to create the top layer in our model.  This is the highest altitude view and should be understandable to the client.</p>
+<p>At this point, don&#39;t worry about the visuals.  You are modelling the system at this point, not drawing it.</p>
+<p>In our sample project, our system can be called by users and because of the API, it can also be called by external systems.</p>
+<aside class="special"><p>If we were using a client-side framework such as React, then we may end up with separate APIs for our client application and for any external systems.  Indeed, there is an emerging pattern where each different client may have their own API.  This is known as the BFF pattern (or back-end for front-end).</p>
+</aside>
+<p>Structurizr provides classes that represent key abstractions in our model such as a software system or a person.</p>
+<p>Let&#39;s create some objects in our code.</p>
+<pre><code>SoftwareSystem greetingMaker = model.addSoftwareSystem(&#34;Greeting Maker&#34;, &#34;Online greeting making made simple.&#34;);
+       Person customer = model.addPerson(&#34;Customer&#34;, &#34;  A person who wishes to send a greeting&#34;);
+       SoftwareSystem greetingClient = model.addSoftwareSystem(&#34;External System&#34;, &#34;An external client that requires a source of greetings.&#34;);
+</code></pre>
+<p>Here, we&#39;ve created two software systems and a user.</p>
+<p>Now, we need to model the relationships.  Our external system and our user &#34;use&#34; our system.</p>
+<pre><code>customer.uses(greetingMaker, &#34;Uses&#34;);
+greetingClient.uses(greetingMaker,&#34;Uses&#34;);
+</code></pre>
+<h2 is-upgraded>Add some views</h2>
+<p>Now we want to add some views to the workspace.</p>
+<pre><code>ViewSet viewSet = workspace.getViews();
+SystemContextView contextView = viewSet.createSystemContextView(greetingMaker, &#34;context&#34;, &#34;The System Context diagram for the Greeting system.&#34;);
+contextView.addAllSoftwareSystems();
+contextView.addAllPeople();
+
+</code></pre>
+<p>Here, we&#39;ve created a set of views, then added a context view to that set.  To that view, we add all of the software systems and all of the people.</p>
+<h2 is-upgraded>Style the viewSet</h2>
+<p>We can add some styling to the view now.  Notice how the code separates the model, the view and the styles.</p>
+<pre><code>greetingMaker.addTags(&#34;Greeting Maker&#34;);
+
+Styles styles = viewSet.getConfiguration().getStyles();
+ styles.addElementStyle(&#34;Greeting Maker&#34;).background(&#34;#6CB33E&#34;).color(&#34;#ffffff&#34;);
+ styles.addElementStyle(Tags.PERSON).background(&#34;#519823&#34;).color(&#34;#ffffff&#34;).shape(Shape.Person);
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Send the model to Structurizr" duration="0">
+        <p>Now we need to send the model to Structurizr.</p>
+<p>This is where our three fields are needed.  If you&#39;ve created the three fields from earlier, you can now add this code.</p>
+<pre><code>StructurizrClient structurizrClient = new StructurizrClient(API_KEY, API_SECRET);
+
+structurizrClient.putWorkspace(WORKSPACE_ID, workspace);
+</code></pre>
+<aside class="special"><p>These lines need to be the last lines of your script.  We&#39;re going to add more to the model and then send it, so keep these lines at the bottom.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run the test" duration="0">
+        <p>Using <em>IntelliJ</em>, run the test.  If you open the document, make sure you close it as your tests will fail if you the workspace is open on the server.</p>
+<aside class="special"><p>At the moment, gradle will run all the tests.  You probably want to exclude the model generation from every build.  You can do this by adding an exclude block into <code>build.gradle</code>. e.g.  If you run using IntelliJ, you can just execute the design test when you need to.</p>
+</aside>
+<pre><code>test {
+    exclude &#39;uk/ac/cf/cm6213/springbootexamples/structurizr/**&#39;
+}
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="View the model" duration="0">
+        <p>Go back to Structurizr and view the workspace.  You should now see a single view.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add a container layers" duration="0">
+        <p>The next layer down in the C4 model is the container layer.  The term container represents a deployable unit so it fits nicely with the ideas of Docker and microservice.  In our simple application, it is more akin to a process and we will typically have two processes running; the Spring Boot server and a database. If we were using React or similar, we&#39;d have a separate node.js server running and that would be a separate container in our layer.</p>
+<p>Here is the code for the model AND the view.</p>
+<pre><code>//model
+Container webApplication = greetingMaker.addContainer(
+        &#34;Spring Boot Application&#34;, &#34;The web application&#34;, &#34;Embedded web container.  Tomcat 7.0&#34;);
+Container relationalDatabase = greetingMaker.addContainer(
+        &#34;Relational Database&#34;, &#34;Stores information regarding greetings and the greeting types&#34;, &#34;Maria DB&#34;);
+customer.uses(webApplication, &#34;Uses&#34;, &#34;HTML/HTTP&#34;);
+greetingClient.uses(webApplication, &#34;Uses&#34;, &#34;JSON/HTTP&#34;);
+webApplication.uses(relationalDatabase, &#34;Reads from and writes to&#34;, &#34;JDBC, port 3306&#34;);
+
+//view
+ContainerView containerView = viewSet.createContainerView(greetingMaker, &#34;containers&#34;, &#34;The Containers diagram for the Greetings System.&#34;);
+containerView.addAllPeople();
+containerView.addAllSoftwareSystems();
+containerView.addAllContainers();
+</code></pre>
+<p>We can add styles to the new elements, by adding tags and then styling the tags.</p>
+<pre><code>//tag
+relationalDatabase.addTags(&#34;Database&#34;);
+//style
+styles.addElementStyle(Tags.CONTAINER).background(&#34;#91D366&#34;).color(&#34;#ffffff&#34;);
+styles.addElementStyle(&#34;Database&#34;).shape(Shape.Cylinder);
+
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add the component view by scanning for Spring components" duration="0">
+        <p>A typical application will have a large number of components and we want to keep those in sync with our source code.  Structurizr provides a scanner that uses reflection to detect Spring components in our code.</p>
+<h2 is-upgraded>Create a component finder</h2>
+<p>Add this code (note the package name.  The finder will scan all packages under this).</p>
+<pre><code>ComponentFinder componentFinder = new ComponentFinder(
+        webApplication,
+        &#34;uk.ac.cf.cm6213.springbootexamples&#34;,
+        new SpringComponentFinderStrategy(
+                new ReferencedTypesSupportingTypesStrategy()
+        ));
+</code></pre>
+<h2 is-upgraded>Scan for SpringComponentFinderStrategy</h2>
+<p>Now tell the finder to find components.</p>
+<pre><code>componentFinder.findComponents();
+</code></pre>
+<h2 is-upgraded>Model the relationships that the finder can&#39;t work about</h2>
+<p>We need to add some extra information to our model.  For example, our user will interact with the controllers.  Our external system will interact with the Rest controllers and our repositories will interact with our database.</p>
+<p>We can use lambdas to set up these relationships.</p>
+<pre><code>webApplication.getComponents().stream()
+        .filter(c -&gt; c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_MVC_CONTROLLER))
+        .forEach(c -&gt; customer.uses(c, &#34;Uses&#34;, &#34;HTTP&#34;));
+
+// connect the external service to all of the Spring Rest controllers
+webApplication.getComponents().stream()
+        .filter(c -&gt; c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_REST_CONTROLLER))
+        .forEach(c -&gt; greetingClient.uses(c, &#34;Uses&#34;, &#34;HTTP&#34;));
+
+// connect all of the repository components to the relational database
+webApplication.getComponents().stream()
+        .filter(c -&gt; c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_REPOSITORY))
+        .forEach(c -&gt; c.uses(relationalDatabase, &#34;Reads from and writes to&#34;, &#34;JDBC&#34;));
+</code></pre>
+<p>Now we add a component view.</p>
+<pre><code>ComponentView componentView = viewSet.createComponentView(webApplication, &#34;components&#34;, &#34;The Components diagram for the Charity 2018 web application.&#34;);
+componentView.addAllComponents();
+componentView.addAllPeople();
+componentView.add(greetingClient);
+componentView.add(relationalDatabase);
+</code></pre>
+<p>...add some tags...</p>
+<pre><code>webApplication.getComponents().stream().filter(c -&gt; c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_MVC_CONTROLLER)).forEach(c -&gt; c.addTags(&#34;Spring MVC Controller&#34;));
+ webApplication.getComponents().stream().filter(c -&gt; c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_REST_CONTROLLER)).forEach(c -&gt; c.addTags(&#34;Spring REST Controller&#34;));
+
+ webApplication.getComponents().stream().filter(c -&gt; c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_SERVICE)).forEach(c -&gt; c.addTags(&#34;Spring Service&#34;));
+ webApplication.getComponents().stream().filter(c -&gt; c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_REPOSITORY)).forEach(c -&gt; c.addTags(&#34;Spring Repository&#34;));
+
+</code></pre>
+<p>...and add some styles...</p>
+<pre><code>styles.addElementStyle(&#34;Spring REST Controller&#34;).background(&#34;#D4FFC6&#34;).color(&#34;#000000&#34;);
+
+styles.addElementStyle(&#34;Spring MVC Controller&#34;).background(&#34;#D4F3C0&#34;).color(&#34;#000000&#34;);
+styles.addElementStyle(&#34;Spring Service&#34;).background(&#34;#6CB33E&#34;).color(&#34;#000000&#34;);
+styles.addElementStyle(&#34;Spring Repository&#34;).background(&#34;#95D46C&#34;).color(&#34;#000000&#34;);
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run the test and review the results" duration="0">
+        <p>Run the test and then visit your workspace.</p>
+<p>You can open each diagram and then edit it.</p>
+<p>Your diagram may look a bit clustered.  You can apply an auto-layout.</p>
+<p>Click the Auto-layout button and choose the &#34;GraphViz&#34; style.</p>
+<p class="image-container"><img alt="Auto Layout Buttton" src="img\9939e9994a6df41f.png"></p>
+<p>Your diagram will be laid out in a more useful format.</p>
+<h2 is-upgraded>Auto-layout at code level</h2>
+<p>There appears to be a hidden method that allows you to set auto-layout in code.  Adding this line appears to instruct the server to automatically layout the view.</p>
+<p>Add this anywhere after the creation of the view object and before the workspace is submitted.</p>
+<pre><code>componentView.enableAutomaticLayout();
+
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Manually add extra Components" duration="0">
+        <p>The scanner won&#39;t pick up every component and it certainly won&#39;t pick up the UX elements (HTML, CSS, JS files).  These can be added manually to the component model.</p>
+<p>We can add components and link them to existing components.</p>
+<pre><code>Component greetingTemplate = webApplication.addComponent(&#34;GreetingList&#34;, &#34;Template to show Greetings&#34;,&#34;Thymeleaf&#34;);
+greetingTemplate.addTags(&#34;Thymeleaf&#34;);
+
+Component exampleController = webApplication.getComponentOfType(&#34;uk.ac.cf.cm6213.springbootexamples.web.ExampleController&#34;);
+
+exampleController.uses(greetingTemplate,&#34;as view&#34;,&#34;Spring MVC&#34;);
+</code></pre>
+<p>In this example, the code:</p>
+<ul>
+<li>Creates a new component to represent a template that uses Thymeleaf.</li>
+<li>We add a tag to the new component.</li>
+<li>Uses the full class name to find an existing components</li>
+<li>Links the components together using <code>uses</code>.</li>
+</ul>
+<p>We can style the templates by applying a style to all components tagged with &#34;Thymeleaf&#34;.</p>
+<p>You can apply this for all missing components (Security configuration, CSS, etc).</p>
+<aside class="special"><p>Think here about the difference between the model and the views.  You can build a complete model, but you can have multiple component views.  You might want to consider a separate &#34;MVC&#34; view that shows the HTML, CSS and JS components and remove the view from the main component view (which will focus on the Spring elements).</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Architecture Decision Records (ADRs)" duration="0">
+        <p>You can also enter ADRs into Structurizr.</p>
+<p>In your workspace, there is a toolbar and one of the buttons is the &#34;Edit&#34; button.</p>
+<p class="image-container"><img alt="edit button" src="img\3186627f041a6578.png"></p>
+<p>You will then see a representation on your model and at the top, there is another toolbar.</p>
+<p class="image-container"><img alt="menu bar" src="img\bf034f3430b9f15d.png"></p>
+<p>Click on this and then add your decisions.  They will appear at the bottom of your workspace.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add JavaDoc Support" duration="0">
+        <p>Structurizr can also scan your source code.  It will use the top-level JavaDoc comment as the description of your component.</p>
+<p>To do this, we need to amend the scanning code.  Replace the block that starts with:</p>
+<pre><code>ComponentFinder componentFinder = new ComponentFinder(
+</code></pre>
+<p>...with...</p>
+<pre><code>File sourceRoot = new File(&#34;C:\\Projects\\Examples\\CM6213-2021\\spring-boot-examples&#34;);
+
+       // and now automatically find all Spring @Controller, @RestController, @Component, @Service and @Repository components
+       ComponentFinder componentFinder = new ComponentFinder(
+               webApplication,
+               &#34;uk.ac.cf.cm6213.springbootexamples&#34;,
+               new SpringComponentFinderStrategy(
+                       new ReferencedTypesSupportingTypesStrategy()
+               ),
+               new SourceCodeComponentFinderStrategy(new File(sourceRoot, &#34;/src/main/java/&#34;), 150)
+
+               );
+
+</code></pre>
+<p>Your next line should then be:</p>
+<pre><code>componentFinder.findComponents();
+</code></pre>
+<aside class="special"><p>You will need to amend the file root and the package structure to match your code and file structure.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add users to your workspace" duration="0">
+        <p>In Structurizr, go to your workspace and click the user button.</p>
+<p class="image-container"><img alt="User button" src="img\a695188d66e314b6.png"></p>
+<p>You can now add users using their <code>@cardiff.ac.uk</code> email account.  You can also transfer ownership to a registered user.</p>
+<p>Adding a user generates an email.  Please tell the invited user to click their email as they do expire.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Explore" duration="0">
+        <p>Do look around the other features of Structurizr such as the various visualisations as this will show how a model can generate different outputs.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

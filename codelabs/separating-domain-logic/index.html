@@ -1,0 +1,109 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Separating Domain Logic into a Component</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="separating-domain-logic"
+                  title="Separating Domain Logic into a Component"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="15">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>How to declare a dependency using an interface</li>
+<li>How to identify a domain component to Spring</li>
+<li>How to inject the component to meet a dependency</li>
+<li>The consequences of this change on our existing tests</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Understand the goal" duration="0">
+        <p>When we looked at the model-view-controller (MVC) pattern, we could see that each part had a distinct role.  However, the roles were still related to the user interface and we had the slightly awkward use of &#34;model&#34; to define two things; the data passed to the view and the internal state of the business or domain.</p>
+<p>In this tutorial, we are going to separate the domain logic from how it is presented.  In this case, the domain logic is the determination of the greeting based on the name and the type.</p>
+<p>Why might we want to do this? Well, just as we&#39;re implementing a web application to play the greeting, we may also want to implement a mobile app for Android to play the greeting...and then one for IoS...and then a native Windows app...and then...etc.</p>
+<p>We would not want to replicate the determination of the greeting in every app so we separate it out, and potentially host it as an API that all apps can access.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Make the dependency explicit" duration="0">
+        <p>Our controller (or should that be ‘controllers&#39;) are going to delegate the greeting decision making to another component.  To do that, they are going to state their dependency on an interface.</p>
+<p>To do that, we add a private member to the controller of type <code>GreetingMaker</code>.</p>
+<pre><code>private GreetingMaker theGreetingMaker;
+</code></pre>
+<p>This interface provides a single method.</p>
+<pre><code>public interface GreetingMaker {
+  Optional&lt;Greeting&gt; determineGreetingWithTime(String name, Optional&lt;String&gt; type);
+}
+</code></pre>
+<p>The method takes a name and an optional String to indicate the type of greeting.  It returns an optional greeting - optional because the contract of the interface is to only return a greeting if the type is absent or valid.</p>
+<p>We want Spring to provide the component that implements the interface.  To do this, we need to provide two things; an annotated class that Spring can register in its container and a mechanism for Spring to inject.</p>
+<h2 is-upgraded>The annotated class</h2>
+<p>We need to provide a class with either the <code>@Component</code> or <code>@Service</code> annotation - the latter is more descriptive.</p>
+<pre><code>@Component
+public class DefaultGreetingMaker implements GreetingMaker {
+\\...the implementation of the interface
+</code></pre>
+<h2 is-upgraded>The mechanism</h2>
+<p>Spring supports a number of ways to inject dependencies.  Providing a constructor that takes all the dependencies as parameters is one.</p>
+<p>This can be annotated with <code>@Autowired</code> (tell Spring to automatically wire in a component that matches the interface), but officially it isn&#39;t required when there is only one constructor.</p>
+<pre><code>@Autowired //not required when there is only one constructor - but makes the code more explicit.
+ public ExampleController(GreetingMaker aGreetingMaker) {
+   theGreetingMaker = aGreetingMaker;
+ }
+</code></pre>
+<p>The project on Gitlab provides an example of the implementation of the method.  An alternative design would be to throw an exception if the type was unknown.  This is a question of design and the appropriate use of exceptions for unexceptional conditions.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Recompile and tests" duration="0">
+        <p>If the server is running with bootrun,</p>
+<p>Run the gradle &gt; build &gt; classes to reload the classes.</p>
+<p>Test from the browser.</p>
+<h2 is-upgraded>Run the build</h2>
+<p>Now, run the build.  The automated tests will fail.  This is because the current tests only load controller components so the dependency can&#39;t be wired.</p>
+<p>You will see this indicated in the error messages from the tests.</p>
+<p>We will fix this in a future tutorial.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review" duration="0">
+        <p>In this tutorial, we have separated the domain logic into a component class, then injected it using dependency injection.  The controller now makes explicit the interfaces on which is relies and Spring injects a component that provides an implementation of the interface.</p>
+<p>The idea of &#34;provided&#34; and &#34;required&#34; interfaces is important when considering the overall architecture of a system.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

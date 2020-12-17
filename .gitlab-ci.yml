@@ -1,0 +1,43 @@
+image: node:latest
+
+stages:
+  - build
+  - deploy
+
+gulp:build:
+  tags:
+    - comsc-ci
+  stage: build
+  script:
+    - npm install
+    - npm install -g gulp-cli
+    - pwd
+    - ls -l
+    - gulp dist --codelabs-dir=codelabs
+    - ls -l dist
+    - unlink dist/codelabs
+    - mv codelabs dist/codelabs
+    
+  artifacts:
+    name: "$CI_JOB_NAME"
+    paths:
+    - ./dist/
+    expire_in: 1 week
+
+pages:
+  tags:
+    - comsc-ci
+  stage: deploy
+  script:
+    - pwd
+    - ls -l
+    - mkdir .public
+    - cp -r dist/* .public
+    - ls -l .public
+    - mv .public/* public/
+    - ls -l public
+  artifacts:
+    paths:
+      - public
+
+

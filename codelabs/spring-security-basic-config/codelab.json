@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-11-23T12:26:19Z",
+  "id": "spring-security-basic-config",
+  "duration": 61,
+  "title": "Spring Security Basic Configuration",
+  "authors": "Phil Smart",
+  "summary": "Spring Security Basic Configuration",
+  "source": "spring-security-basic-config.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "cyber-security"
+  ],
+  "tags": [
+    "spring-security"
+  ],
+  "url": "spring-security-basic-config"
+}

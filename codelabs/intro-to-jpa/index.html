@@ -1,0 +1,213 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Introduction to Java Persistence Architecture (Spring Data JPA)</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="intro-to-jpa"
+                  title="Introduction to Java Persistence Architecture (Spring Data JPA)"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="30">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>How to use JPA to manage the mapping of objects to a relational database.<br></li>
+<li>How to annotate a class for JPA</li>
+<li>How to specify the primary key generation strategy</li>
+<li>How to start modelling relationships</li>
+<li>How to adapt existing interfaces to use jpa</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Understand the goal" duration="0">
+        <p>With JDBC, we have to write the SQL ourselves and we need to write code to convert the returned data into objects.  We have to manage the primary and foreign keys and the object graphs ourselves.  This provides a deep level of control over the database interaction and enables us to make full use of the facilities of the database, tuning queries and data sizes to the needs of the request.</p>
+<p>However, there is another point of view that would say that there are a number of common patterns in the generation of the SQL and that those patterns can be abstracted into a framework that can generate the SQL, handling key generation, joins and offer concepts such as eager vs lazy loading (lazy =&gt; only getting data from the database when required).</p>
+<p>This latter concern has been addressed for many years.  The dominate ORM (object-relational mapping) framework in Java is <a href="https://www.hibernate.org/orm" target="_blank">Hibernate</a> which is used by Spring Data JPA (Java Persistence Architecture).</p>
+<p>In this tutorial, we are going to introduce Spring Data JPA.  It is only intended to provide an overview.  JPA is a large framework with many features and options and is well beyond the scope of a single tutorial.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Basics" duration="0">
+        <p>In Spring Data JPA, we need to do the following:</p>
+<ul>
+<li>Annotate our domain classes so that they are mapped to tables (these domain classes then become known as ‘Entity&#39; classes)</li>
+<li>Annotate the fields in our domain classes so that they map to columns in tables</li>
+<li>Annotate certain fields in our domain classes so that we know which relate to a primary keys</li>
+<li>Annotate certain fields in our domain classes so that we know which relate to object-to-object relationships and how they relate to foreign keys</li>
+<li>Create Repository components that allow to persist Entity objects</li>
+<li>Write methods on our Repository components that define queries</li>
+</ul>
+<aside class="special"><p>In the accompanying video, we show how to adapt the calls to the new JPA repositories so that we can leave our existing controllers and services untouched.  This won&#39;t be covered in this tutorial.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Adding the JPA dependency" duration="0">
+        <p>As always, we need to add the Spring Data JPA dependency to our project.  We do this by adding this line to <code>build.gradle</code> in the <code>dependencies</code> block.</p>
+<pre><code>implementation &#39;org.springframework.boot:spring-boot-starter-data-jpa&#39;
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Converting a domain class to an Entity" duration="0">
+        <p>To delegate persistence to JPA, we need to convert our domain classes into entities.</p>
+<aside class="special"><p>We could keep our domain classes as POJOs (plain old Java objects) if we wished.  We would then need to marshall the data between our domain objects and our entities.</p>
+</aside>
+<h2 is-upgraded>Add the @Entity annotation</h2>
+<p>We need to identify the class as an entity, so we add the <code>@Entity</code> annotation to the class.</p>
+<pre><code>@NoArgsConstructor
+@Entity
+public class Greeting {
+//...
+</code></pre>
+<p>We do the same for the GreetingType class.</p>
+<pre><code>@NoArgsConstructor
+@Entity
+public class GreetingType {
+//..
+
+</code></pre>
+<p>The import package for JPA is <code>javax.persistence.*</code>.</p>
+<aside class="special"><p>We also have to include a no-args constructor on any entity class.  This is related to proxies which will be explained later.  Luckily, Lombok provides a convenient annotation for this.</p>
+</aside>
+<h2 is-upgraded>Identify the primary key</h2>
+<p>To tell JPA which field in the class relates to the primary key in the table, we need to apply the <code>@Id</code> annotation.</p>
+<p>For Greeting:</p>
+<pre><code>@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+Long id;
+</code></pre>
+<p>In the <code>Greeting</code> case, the primary key is a new <code>Long</code> field (it must be an object type) and we want the database to create the primary key when we save a new object to the database.  JPA allows us to specify a number of different generation strategies.  Here we are choosing one that is compatible with our database&#39;s <code>AUTO-INCREMENT</code> setting.</p>
+<p>For GreetingType:</p>
+<pre><code>@Id
+ private String type;
+
+</code></pre>
+<p>In the <code>GreetingType</code> class, we have a natural primary key and we manage new rows in this table via direct SQL, so we don&#39;t specify a generation strategy.</p>
+<h2 is-upgraded>Naming standards</h2>
+<p>We are now in a position where we could save and retrieve objects from tables.  Spring Data JPA applies convention-over-configuration again and assumes that a Greeting class object will be saved in a ‘greeting&#39; table and that a GreetingType class object will be saved into a ‘greeting_type&#39;.  That is, it applies a naming strategy to convert standard camel case Java code into standard underscored table names.</p>
+<p>It applies the same logic to fields and columns.</p>
+<p>If the mappings differ, JPA supplies a <code>@Table</code> annotation (at class level) and a <code>@Column</code> annotation (at field level).</p>
+<p>For more info, see <a href="https://www.baeldung.com/hibernate-field-naming-spring-boot" target="_blank">this</a>.</p>
+<h2 is-upgraded>Annotating relationships</h2>
+<p>Every Greeting object is linked to a GreetingType object, and each GreetingType could be related to many (lots) of Greeting objects.</p>
+<p>In this example, we want to be able to ask every Greeting object for its GreetingType, but we don&#39;t want to be able to ask every GreetingType object for Greetings of that type (as that could return a big list).</p>
+<p>In essence, we have a one-to-many relationship between GreetingType and Greeting, which implies a many-to-one in the opposite direction.</p>
+<p>The annotations are (in Greeting.java):</p>
+<pre><code>@ManyToOne
+@JoinColumn(name = &#34;type&#34;)
+private GreetingType type;
+
+</code></pre>
+<p>Let&#39;s walk through these annotations.</p>
+<p>The annotation <code>@ManyToOne</code> is self explanatory.  We are in the &#34;many&#34; side of the relationship and we&#39;re pointing at the &#34;one&#34; side.</p>
+<p>The annotation <code>@JoinColumn</code> tells us the column name in the table that will be used to handle the relationship in the database.  In the <code>greeting</code> table, we have a column &#34;type&#34; of type &#34;VARCHAR&#34;.  We will put the foreign key in this column.</p>
+<p>However, when we retrieve the data, we will want to get a <code>Greeting</code> object and be able to call <code>getType()</code> to get a <code>GreetingType</code> object back.</p>
+<h2 is-upgraded>What SQL is generated</h2>
+<p>You may already be thinking what SQL is generated.  There are two options (at least).</p>
+<p>When we get a <code>Greeting</code> object (or set of such), we will select from the <code>greeting</code> table.  This will give us the foreign key to <code>GreetingType</code>.  When <code>getType()</code> is called, we would need to generate another select on the <code>greeting_type</code> table to get the other fields and populate an object.  This is known as lazy loading because we only pull data from the database when it is required.</p>
+<p>Alternatively, we could join the table together, so that every row contains all the required fields to create all objects.  This pulls back more data (maybe some is not required), but reduces the number of queries made.  This is known as eager loading.</p>
+<aside class="special"><p>Some of you may be wondering how the 2nd SQL query gets generated because our <code>Greeting</code> class doesn&#39;t contain any SQL-generating code.  The truth is that you don&#39;t get back instances of your <code>Greeting</code> class.  Rather you get back a <em>proxy</em> to your class.  This proxy is generated by JPA and it acts as an intermediary.  It sits between the calling code and your POJO and intercepts the call, making the SQL call as required.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="The JPA Repository" duration="0">
+        <p>Making a JPA repository component requires you to extend a provided generic interface.</p>
+<p>Create an interface called <code>GreetingRepoJPA</code>.</p>
+<p>Import <code>org.springframework.data.jpa.repository.JpaRepository</code>.</p>
+<p>Your interface can then be made to extend <code>JpaRepository</code>.</p>
+<pre><code>public interface GreetingRepoJPA extends JpaRepository&lt;Greeting, Long&gt; {
+//..
+}
+</code></pre>
+<p>This is an interface extending an interface.  The <code>JpaRepository</code> is provided with two types - the type of entity that the repository is managing (in this case, ‘Greeting&#39;) and the type of the key of that entity.</p>
+<p>Yes, it does seem odd that the type of the key needs to be provided, when Spring does everything else by reflection!</p>
+<h2 is-upgraded>Standard methods</h2>
+<p>At this point, there are already a number of methods available.  You could inject this component (no need to annotate with <code>@Repository</code>) into another component and see the methods.  (Try it and let IntelliJ show you the available methods)</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Adding methods" duration="0">
+        <p>We now want to add methods to the interface that meet our needs.  Firstly, let&#39;s add a method to get a list of <code>Greeting</code> objects by name.</p>
+<p>In our new interface source file, add the following method declaration.</p>
+<pre><code>List&lt;Greeting&gt; findByName(String aName);
+</code></pre>
+<p>Believe it or not, you&#39;ve just implemented a method that will generate the SQL required to get the right rows from the database and construct the required objects.</p>
+<p>Spring Data JPA can parse the method name.  Each part instructs the framework to generate the required code.</p>
+<p>‘find&#39; =&gt; a select is required<br>‘By&#39; =&gt; a where will be required<br>‘Name&#39; =&gt; implies the column ‘name&#39; will be in the &#34;where&#34; clause.</p>
+<p>Let&#39;s add a more complicated method.  Let&#39;s get the 5 most recent greetings.</p>
+<pre><code>List&lt;Greeting&gt; findTop5ByOrderByTimestampDesc();
+</code></pre>
+<p>‘find&#39; - as above<br>‘top&#39; =&gt; a ‘LIMIT&#39; (or similar) will be required on the SQL<br>‘5&#39; =&gt; the number to limit to<br>‘By&#39; =&gt; since it&#39;s followed by ‘Order&#39; it means no &#34;where&#34; clause<br>‘OrderBy&#39; =&gt; implies we&#39;ll have an order by on the SQL<br>‘Timestamp&#39; =&gt; implies the field to sort by<br>‘Desc&#39; =&gt; implies the direction of the sort</p>
+<p>We now have a functioning repository for retrieving <code>Greeting</code> objects.  Let&#39;s add the same for <code>GreetingType</code> objects.</p>
+<p>This is all we need:</p>
+<pre><code>public interface GreetingTypeRepoJPA extends JpaRepository&lt;GreetingType, String&gt; {
+}
+</code></pre>
+<p>This will give us a <code>findById()</code> method and that&#39;s all we need.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Using the new JPA repository" duration="0">
+        <p>In the <a href="https://git.cardiff.ac.uk/ase-2020/cm6213/springbootexamples/-/tree/convert-to-jpa" target="_blank">Gitlab project</a>, we show how to write adaptors that enable the service components to work unchanged.  Here we&#39;ll highlight some of the code.</p>
+<p>In our adaptor, we inject the new repository and refer to it with field <code>greetingRepoJPA</code>.</p>
+<p>We can then write the following methods:</p>
+<pre><code>public void saveGreeting(Greeting aGreeting) {
+   greetingRepoJPA.save(aGreeting);
+ }
+
+ @Override
+ public void updateGreeting(Greeting aGreeting) {
+   greetingRepoJPA.save(aGreeting);
+ }
+</code></pre>
+<p>Things to note include:</p>
+<p>The <code>saveGreeting</code> and <code>updateGreeting</code> methods are exactly as before (with JDBC).  Now, we delegate the call to the <code>save()</code> method on the new repository.  We didn&#39;t write this <code>save</code> method.  We didn&#39;t even specify it, but it&#39;s there for free because we extended <code>JpaRepository</code>.</p>
+<p>Also, note that both methods use <code>save()</code>.  JPA can work out if the object is new (and therefore needs an ‘insert&#39;) or existing (and therefore needs an ‘update&#39;).</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="0">
+        <p>This has been a fly-past of JPA.  It can do so much more and you can control the SQL so much more.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

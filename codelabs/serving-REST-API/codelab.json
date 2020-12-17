@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-10-14T08:00:20+01:00",
+  "id": "serving-REST-API",
+  "duration": 10,
+  "title": "Serving a RESTful API",
+  "authors": "Carl Jones",
+  "summary": "Serving a REST API",
+  "source": "serving-an-api.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "serving-REST-API"
+}

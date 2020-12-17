@@ -1,0 +1,25 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-11-18T22:55:14Z",
+  "id": "spring-security-setup",
+  "duration": 18,
+  "title": "Spring Security Basic Setup",
+  "authors": "Phil Smart",
+  "summary": "Enable Spring Security in an existing project",
+  "source": "spring-security-setup.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "cyber-security"
+  ],
+  "tags": [
+    "setup",
+    "spring-security"
+  ],
+  "url": "spring-security-setup"
+}

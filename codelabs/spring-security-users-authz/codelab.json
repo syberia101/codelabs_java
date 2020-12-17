@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-11-23T12:18:07Z",
+  "id": "spring-security-users-authz",
+  "duration": 21,
+  "title": "Spring Security Test User Setup and Simple Authorisation",
+  "authors": "Phil Smart",
+  "summary": "Spring Security Test User Setup and Simple Authorisation",
+  "source": "spring-security-users-authz.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "cyber-security"
+  ],
+  "tags": [
+    "spring-security"
+  ],
+  "url": "spring-security-users-authz"
+}

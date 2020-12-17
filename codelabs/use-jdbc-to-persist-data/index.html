@@ -1,0 +1,559 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Use JDBC to persist data to a relational database</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="use-jdbc-to-persist-data"
+                  title="Use JDBC to persist data to a relational database"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="60">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>How to configure Spring Boot to use a H2 database</li>
+<li>How to set up a test database</li>
+<li>How to create a Repository component</li>
+<li>How to inject the JdbcTemplate into the Repository component</li>
+<li>How to inject the Repository component into the application</li>
+<li>How to change the architecture so that the core defines the abstractions</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="The Goal of this tutorials" duration="0">
+        <p>In this tutorial, we are going to complete our first end-to-end slice.  Up to now, everything has been done using hard-coded data.  We have introduced dependency injection and Spring&#39;s Autowiring approach, and we are going to continue with that pattern as we introduce a new layer to our application.</p>
+<p>This new layer is the data access layer and will consist of a component called a repository.  Unsurprisingly, this component will be annotated with the <code>@Repository</code> annotation.  From that point, all the usual rules apply.  The component can be injected into other components if the interface that it implements matches that required by the dependent component.</p>
+<h2 is-upgraded>H2</h2>
+<p>For this tutorial, we are going to use the H2 database.  This is a relational database that runs in-memory.  Spring Boot can be configured to start a H2 database when it starts (or restarts) the application.  This means that data doesn&#39;t persist between restarts which makes it ideal for testing as each new start puts the database into a clean state as required for testing.</p>
+<p>As you will see later, changing to MySQL, Maria, Oracle or any other relational database is (mostly) a matter of changing the dependencies and the application properties.  However, some databases offer specific SQL extensions and using those may require change to the SQL queries that are written.</p>
+<p>Positive<br>:Choosing to put the responsibility into a specific database would be an architectural choice.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Start from a working application" duration="0">
+        <p>Make sure you have a working &#34;Greeting&#34; application before starting this tutorial.  It doesn&#39;t need to have the full feature set, just enough to play a greeting as a response.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add the required dependencies to the projects" duration="0">
+        <p>Currently, our project has no database access dependency and Spring&#39;s tools don&#39;t support the addition of dependencies via the wizard.</p>
+<p>You can always create a new project that contains the dependencies and then copy and paste the required lines across, or you can search the Maven repository for the dependencies.</p>
+<ul>
+<li>Go to <a href="https://mvnrepository.com/" target="_blank">Maven Repository</a></li>
+<li>Search for &#34;Spring Boot JDBC&#34;</li>
+<li>Select &#34;Spring Boot Starter JDBC&#34;</li>
+<li>Select the latest release</li>
+<li>Click the &#34;Gradle&#34; tab</li>
+<li>Copy and paste the code provided into the dependencies section of build.gradle.</li>
+</ul>
+<pre><code>// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-jdbc
+compile group: &#39;org.springframework.boot&#39;, name: &#39;spring-boot-starter-jdbc&#39;, version: &#39;2.3.4.RELEASE&#39;
+</code></pre>
+<p>In the provided example, I&#39;ve converted this to the more modern &#34;implementation&#34; approach and combined the group and name into one string using the &#34;:&#34; to separate group name from artifact name.</p>
+<pre><code>dependencies {
+    //...
+    implementation &#39;org.springframework.boot:spring-boot-starter-jdbc&#39;
+</code></pre>
+<h2 is-upgraded>Repeat for H2</h2>
+<p>The gradle from the Maven Repository is:</p>
+<pre><code>// https://mvnrepository.com/artifact/com.h2database/h2
+testCompile group: &#39;com.h2database&#39;, name: &#39;h2&#39;, version: &#39;1.4.200&#39;
+</code></pre>
+<p>Sometimes you need to think about how you&#39;re using the dependency.  In our case, we want the H2 database to be available when we run our application, not just when we compile tests (as implied by Maven Repository).  Therefore, in our example, we will replace <code>testCompile</code> with <code>runtime</code>.  Our build.gradle file&#39;s dependencies section will look like this:</p>
+<pre><code>dependencies {
+    implementation &#39;org.springframework.boot:spring-boot-starter-thymeleaf&#39;
+    implementation &#39;org.springframework.boot:spring-boot-starter-web&#39;
+    implementation &#39;org.springframework.boot:spring-boot-starter-validation&#39;
+
+    implementation &#39;org.springframework.boot:spring-boot-starter-jdbc&#39;
+    runtime &#39;com.h2database:h2&#39;
+
+    compileOnly &#39;org.projectlombok:lombok&#39;
+    developmentOnly &#39;org.springframework.boot:spring-boot-devtools&#39;
+    annotationProcessor &#39;org.projectlombok:lombok&#39;
+    testImplementation(&#39;org.springframework.boot:spring-boot-starter-test&#39;) {
+        exclude group: &#39;org.junit.vintage&#39;, module: &#39;junit-vintage-engine&#39;
+    }
+}
+</code></pre>
+<p>Our new dependencies are the two lines in the middle.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure the databases" duration="0">
+        <p>We now need to configure the database so that the application can access it.</p>
+<p>We are going to edit the file at <code>/src/main/resources/application.properties</code>.</p>
+<p>We need to set the driver, URL, user id and password for the database.</p>
+<p>Add the following lines:</p>
+<pre><code>spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.username=sa
+spring.datasource.password=password
+</code></pre>
+<h2 is-upgraded>Run the application and access the console</h2>
+<ul>
+<li>Run the application.</li>
+<li>Go to <a href="http://localhost:8080/h2-console" target="_blank">http://localhost:8080/h2-console</a>.</li>
+</ul>
+<p>You will see this login page.</p>
+<p class="image-container"><img alt="h2-console" src="img\c22467691f732029.png"></p>
+<p>Click <code>Connect</code> and you will a simple DB console application.  You won&#39;t have any tables to access yet.  We&#39;ll do that next.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Adding test data" duration="0">
+        <p>At the moment, our database is empty, but we can ask Spring Boot to run DB scripts at startup, just by providing them in a standard location (more convention over configuration).</p>
+<ul>
+<li>Add a file called <code>schema.sql</code> to <code>/src/main/resources</code>.</li>
+<li>Add this DDL to the file.</li>
+</ul>
+<pre><code>SET MODE MySQL;
+SET IGNORECASE=TRUE;
+
+CREATE TABLE IF NOT EXISTS `greeting` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NOT NULL,
+  `message` VARCHAR(100) NOT NULL,
+  `timestamp` TIMESTAMP NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+</code></pre>
+<ul>
+<li>This sets a couple of properties; we want to use MySQL SQL dialect and we want to ignore the case in queries.</li>
+<li>We then create a table.</li>
+</ul>
+<h2 is-upgraded>The Greeting table</h2>
+<p>The table contains 4 fields.</p>
+<ul>
+<li>The <code>id</code> field is a number and is the primary key of the table.  We want the database to allocate a new value to this for new rows.</li>
+<li>The <code>name</code> and <code>message</code> fields are character-based and will map to the fields of the same name in the <code>Greeting</code> class.</li>
+<li>The <code>timestamp</code> field is added by the application so that we have the timestamp is a data type that can do date functions (e.g. order by)</li>
+</ul>
+<h2 is-upgraded>Run the application</h2>
+<p>If you run the application, and access the h2-console again, you will see the table (which will be empty).</p>
+<h2 is-upgraded>Adding test data</h2>
+<p>So far, we&#39;ve created a schema.  We can also add test data by providing a file called <code>test.sql</code> in the same folder as the <code>schema.sql</code> file.  This file should contain SQL to insert/update data.  We don&#39;t need it in our example, so don&#39;t include the file (Spring Boot will complain if it sees an empty file called <code>data.sql</code>.)</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add a Repository component" duration="0">
+        <p>We&#39;re now going to add a component.  The role of this component is to extract data from the database and present it to us as objects.  It will offer our application an interface to retrieve and store data from the database in a variety of ways.</p>
+<h2 is-upgraded>What drives the design of the repository interface?</h2>
+<p>An aside from the coding.  Now we have to decide what the interface should look like.  We can drive this in at least two ways; inside-out or bottom-up.</p>
+<ul>
+<li>Inside-out: the design is driven by what the core of our application requires</li>
+<li>Bottom-up: the design is driven by what our repository wishes to provided</li>
+</ul>
+<p>We are going to take an inside-out approach in this example.</p>
+<h2 is-upgraded>Add an interface in the domain package</h2>
+<p>Since we are taking an inside-out approach, the core of our application is going to state what it requires.  This requires us to revisit the code that we already have.</p>
+<p>The core of our application is exposed via the GreetingMaker interface.  It offers a method that accepts two strings as parameters and returns an Optional <code>Greeting</code> object as the return.  We want this <code>Greeting</code> class to be part of our domain so we create a new class in the <code>domain</code> package.</p>
+<p>The class should look something like this:</p>
+<pre><code>@Data
+@AllArgsConstructor
+public class Greeting {
+  Long id;
+  private String name;
+  private String message;
+  private LocalDateTime timestamp;
+
+  public Greeting(String aName, String aMessage) {
+    this(null, aName, aMessage, LocalDateTime.now());
+  }
+}
+</code></pre>
+<p>Negative<br>:This will cause other parts of the code to break because you probably have a <code>Greeting</code> class in another package (e.g. ‘web&#39;).  Don&#39;t worry, we&#39;re going to fix that in a minute.</p>
+<p>Therefore, our <code>GreetingMaker</code> interface (which is part of the domain) is returning a class from within the domain.</p>
+<p>Equally, we want to express the requirement on the repository in terms of a domain class.  So, let&#39;s define that interface and call it <code>GreetingAuditor</code>.</p>
+<p>The interface should be in the <code>domain</code> package and look like this:</p>
+<pre><code>public interface GreetingAuditor {
+  public void saveGreeting(Greeting aGreeting);
+}
+</code></pre>
+<p>It contains one method and we can see that its purpose is to save a domain <code>Greeting</code> object.  Note: we don&#39;t know how the object will be saved.  The interface reveals nothing about the type of database being used.</p>
+<h2 is-upgraded>Add the implementation</h2>
+<p>Now we need a class that implements the interface.  At this point, we are going to need JDBC (Java DataBase Connectivity) to access the database.</p>
+<ul>
+<li>Create a class called &#34;GreetingAuditorJDBC&#34; and add this code:</li>
+</ul>
+<pre><code>//...add your package here remember
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.stereotype.Repository;
+import uk.ac.cf.cm6213.springbootexamples.domain.Greeting;
+import uk.ac.cf.cm6213.springbootexamples.domain.GreetingAuditor;
+
+import java.sql.*;
+import java.util.List;
+import java.util.Map;
+
+@Repository
+public class GreetingAuditorJDBC implements GreetingAuditor {
+
+  @Autowired
+  private JdbcTemplate jdbc;
+
+  public void saveGreeting2(Greeting aGreeting) {
+
+    GeneratedKeyHolder holder = new GeneratedKeyHolder();
+
+    jdbc.update(
+            new PreparedStatementCreator() {
+              @Override
+              public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                PreparedStatement ps =
+                        connection.prepareStatement(&#34;insert into greeting(name, message, timestamp) values(?,?,?)&#34;, Statement.RETURN_GENERATED_KEYS);
+
+                ps.setString(1, aGreeting.getName());
+                ps.setString(2, aGreeting.getMessage());
+                ps.setTimestamp(3, Timestamp.valueOf(aGreeting.getTimestamp()));
+                return ps;
+              }
+            },
+            holder);
+
+    aGreeting.setId(holder.getKey().longValue());
+    System.out.println(aGreeting);
+
+  }
+
+
+  @Override
+  public void saveGreeting(Greeting aGreeting) {
+
+    Map&lt;String, Object&gt; greetingMap = Map.of(&#34;name&#34;, aGreeting.getName(), &#34;message&#34;, aGreeting.getMessage(), &#34;timestamp&#34;, aGreeting.getTimestamp());
+
+    SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbc)
+            .withTableName(&#34;greeting&#34;)
+            .usingGeneratedKeyColumns(&#34;id&#34;);
+    Long key = simpleJdbcInsert.executeAndReturnKey(greetingMap).longValue();
+    aGreeting.setId(key);
+    System.out.println(aGreeting);
+
+  }
+  //...
+}
+</code></pre>
+<p>In this example, there are two implementations of the same method.  I&#39;ve just renamed one to <code>saveGreeting2</code> to avoid a clash.</p>
+<p>Let&#39;s go over some of the key points.</p>
+<h3 is-upgraded>The annotation</h3>
+<p>The class is annotated with the <code>@Repository</code> interface.  This identifies it as a Spring component that can be loaded into the container and also tells Spring that this is a component that might be a candidate for loading when we do DB testing.</p>
+<h3 is-upgraded>The JdbcTemplate</h3>
+<p>We need to use JDBC to access the database.  JDBC code is typically very similar every time you use it and there are common rules to follow such as making sure that the connection is closed each time.  Spring provides the <code>JdbcTemplate</code> interface (and an implementation) that seeks to reduce the amount of repeated code.  It allows the application developer to focus on:</p>
+<ul>
+<li>The SQL to send to the database</li>
+<li>The parameters that may need to be passed into the SQL query</li>
+<li>Mapping the rows into objects for return to the calling code</li>
+</ul>
+<p>We add the JdbcTemplate to the repository by using the <code>@Autowire</code> annotation.</p>
+<pre><code>//...
+public class GreetingAuditorJDBC implements GreetingAuditor {
+
+  @Autowired
+  private JdbcTemplate jdbc;
+  //...
+</code></pre>
+<p>As you might expect now, Spring will provide the implementation of the template for us.  It is a standard component that Spring knows it will have to provide as soon as put the JDBC dependency in the <code>build.gradle</code> file.</p>
+<p>We can now use the <code>jdbc</code> variable in our methods.</p>
+<h3 is-upgraded>Using the templates</h3>
+<p>Let&#39;s look at the shorter method which uses the <code>SimpleJdbcInsert</code> class.</p>
+<pre><code>//...
+@Override
+  public void saveGreeting(Greeting aGreeting) {
+
+    Map&lt;String, Object&gt; greetingMap = Map.of(&#34;name&#34;, aGreeting.getName(), &#34;message&#34;, aGreeting.getMessage(), &#34;timestamp&#34;, aGreeting.getTimestamp());
+
+    SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbc)
+            .withTableName(&#34;greeting&#34;)
+            .usingGeneratedKeyColumns(&#34;id&#34;);
+    Long key = simpleJdbcInsert.executeAndReturnKey(greetingMap).longValue();
+    aGreeting.setId(key);
+    System.out.println(aGreeting);
+  }
+  //...
+</code></pre>
+<p>Let&#39;s examine this code line-by-line.</p>
+<pre><code>//...
+    Map&lt;String, Object&gt; greetingMap = Map.of(&#34;name&#34;, aGreeting.getName(), &#34;message&#34;, aGreeting.getMessage(), &#34;timestamp&#34;, aGreeting.getTimestamp());
+  //...
+</code></pre>
+<p>The <code>SimpleJdbcInsert</code> class requires the data to be saved to be supplied in the form of a <code>Map</code>.  The key of each entry in the map should match a column name in the table and the value should be the value to be saved.  Note: we don&#39;t need to set the value of the <code>id</code> column because we set up the database to set this automatically on insert.  So here, we use the <code>Map.of</code> method to create a map of the data that we wish to insert.</p>
+<pre><code>//...
+    SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbc)
+            .withTableName(&#34;greeting&#34;)
+            .usingGeneratedKeyColumns(&#34;id&#34;);
+  //...
+</code></pre>
+<p>Next, we create a <code>SimpleJdbcInsert</code> object by constructing it and passing our <code>JdbcTemplate</code> to it.  The <code>SimpleJdbcInsert</code> object wraps the template and uses it to call the database.</p>
+<p>The <code>.withTableName</code> method allows us to say which table we want to insert into and <code>usingGeneratedKeyColumns</code> allows us to say what the primary key columns are.</p>
+<pre><code>//...
+    Long key = simpleJdbcInsert.executeAndReturnKey(greetingMap).longValue();
+    aGreeting.setId(key);
+    System.out.println(aGreeting);
+  }
+  //...
+</code></pre>
+<p>These last lines show us how to get the generated key back from the call to the database.  <code>executeAndReturnKey</code> passes in the <code>Map</code> of our object and returns the value of the new key (i.e. the value given to the <code>id</code> column in the new row).</p>
+<p>We can then set the id of the Greeting object and print it to the console.</p>
+<p>We&#39;ll come back to the other implementation, but first let&#39;s call this method from another service so that we can see data going into the database.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Calling the Repository" duration="0">
+        <p>As is the way with Spring, we will inject the repository into another component.</p>
+<h2 is-upgraded>Add the GreetingAuditor dependency</h2>
+<p>Adjust the code (you should be able to work out how to do this)...</p>
+<pre><code>@Component
+public class DefaultGreetingMaker implements GreetingMaker {
+
+  private GreetingAuditor greetingAuditor;
+
+  @Autowired
+  public DefaultGreetingMaker(GreetingAuditor aGreetingAuditor) {
+    greetingAuditor = aGreetingAuditor;
+  }
+</code></pre>
+<ul>
+<li>Spring will inject the repository component that implements the required interface.</li>
+</ul>
+<h2 is-upgraded>Use the GreetingAuditor interface</h2>
+<p>Positive<br>:Examine the code on Gitlab before proceeding</p>
+<p>There are some other subtle changes in the code.  The <code>Greeting</code> class has been moved into the domain package and the <code>GreetingMaker</code> and <code>GreetingAuditor</code> use this class.</p>
+<p>This has been done to make the interfaces cohesive.  Those interfaces offered or required by the domain should be stated in terms of domain objects.</p>
+<p>This will have knock-on effects in terms of change, but will make our architecture cleaner.  The components in the <code>web</code> package now have to make or receive domain objects doing whatever transformations they need to do, but the <code>domain</code> package has no dependency on the <code>web</code> package which is what we want to achieve.</p>
+<h3 is-upgraded>Add a method to call the interface</h3>
+<p>Add this method...</p>
+<pre><code>private void auditGreeting(Greeting aGreeting) {
+
+  uk.ac.cf.cm6213.springbootexamples.domain.Greeting domainGreeting = new uk.ac.cf.cm6213.springbootexamples.domain.Greeting(aGreeting.getName(), aGreeting.getMessage());
+
+  greetingAuditor.saveGreeting(domainGreeting);
+}
+</code></pre>
+<h3 is-upgraded>Adjust the <code>determineGreetingWithTime</code> method to call this method...</h3>
+<p>The new line is highlighted with a comment below.</p>
+<pre><code>Optional&lt;Greeting&gt; returnGreeting = Optional.of(new Greeting(name, timedMessage));
+
+   if (returnGreeting.isPresent()) {
+     auditGreeting(returnGreeting.get()); //new line
+   }
+
+   return returnGreeting;
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Recap" duration="0">
+        <p>We now have an end to end application.</p>
+<p>The controller requires a service (<code>GreetingMaker</code>) which is implemented by the <code>DefaultGreetingMaker</code> and in turn, this service requires a repository (<code>GreetingAuditor</code>) which is implemented by the <code>GreetingAuditorJDBC</code> class.</p>
+<p>Both the service and the repository classes are annotated with <code>@Service</code> and <code>@Repository</code> respectively.  These annotations tell Spring to treat these classes as components and make them candidates for injection.</p>
+<p>Using reflection, Spring can determine which constructors or fields have <code>@Autowired</code> requirements and which interfaces are required.  It can then look to see which components implement the required interfaces.  Spring will, by default create one single instance of each component, and can then pass that instance into the constructors as parameters.  This enables it to ‘wire&#39; an application together from components.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Run the application" duration="0">
+        <p>Run the application.</p>
+<ul>
+<li>Go to <a href="http://localhost:8080/greeting-form" target="_blank">http://localhost:8080/greeting-form</a>.</li>
+<li>Enter a name, pick a greeting type and click ‘Submit&#39;.</li>
+<li>In a separate tab, open the <a href="http://localhost:8080/h2-console" target="_blank">h2-console</a>.</li>
+<li>Login (remember the credentials are in <code>application.properties</code>)</li>
+<li>Click on <code>GREETING</code> in the left-hand pane.</li>
+<li>You will see <code>SELECT * FROM GREETING</code> appear in the SQL pane.</li>
+<li>Click on the <code>Run</code> tab in the SQL pane.</li>
+<li>You should see a row appear in the table.</li>
+<li>Repeat with different tests.  Only successful greetings will be audited.<ul>
+<li>You don&#39;t have to use the form.  Try the direct link...e.g <a href="http://localhost:9090/greet/formal?name=Clare" target="_blank">http://localhost:9090/greet/formal?name=Clare</a></li>
+</ul>
+</li>
+</ul>
+<aside class="special"><p>Notice that the <code>id</code> is automatically generated for us as we asked the database to generate this field for us.  Different databases do this in their own way.  For example, Oracle requires you to set up sequence objects in the database.</p>
+</aside>
+<p>At some point, we will almost certainly need to access the primary key that has just been generated.  For example, if were saving a graph of related objects, we were need to form the joins between the tables that are storing our objects.  We would need to get the newly-generated primary key from one object so that we can set it as the foreign key on the other.</p>
+<p>Some developers welcome this level of control over the SQL that is sent to the database, but it can have the effect that the objects become nothing more than data records and the full object-oriented model (where state and behaviour are combined to provide full abstractions) is not fully utilised.</p>
+<p>This is known as the ‘object-relational mismatch&#39; and there are a number of different views and solutions to this.</p>
+<p>Spring offers at least two alternatives; Spring Data JPA and Spring Data JDBC.</p>
+<ul>
+<li>Spring Data JPA - JPA stands for Java Persistence Architecture and provides an ‘object-relational mapping (ORM)&#39; solution where the developer can avoid writing the SQL themselves.  The idea is that by taking the responsibility for SQL writing away from the developer, that they will be encouraged to follow better OO principles, be willing to use OO modelling techniques such as inheritance and, as a by product, get database portability because the framework will handle the differences for you.</li>
+<li>Spring Data JDBC - this is a relatively new approach and follow a design approach known as Domain-driven Design (DDD).  In DDD, the problem domain is split into a number of distinct domains (e.g. Customer order handling, dispatch, warehousing, etc) and each sub-domain is modelled separately.  DDD is beyond the scope of this module, but it is a highly recommended technique as it dovetails nicely with microservices and can enable developers and architects to split a large domain into areas that ‘fit in your head&#39;.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Our current architecture" duration="0">
+        <p><br>```<br>@startuml assets/firstDiagram<br><br>class GreetingController<br>class DefaultGreetingMaker<br>class GreetingAuditorJDBC<br>interface GreetingMaker<br>interface GreetingAuditor<br><br>GreetingMaker &lt;|--  DefaultGreetingMaker<br>note on link : Core service offers an interface<br>GreetingAuditor &lt;|--  GreetingAuditorJDBC<br><br>GreetingController --&gt; GreetingMaker<br><br>DefaultGreetingMaker --&gt; GreetingAuditor<br>note on link : core service requires an interface<br><br>@enduml<br>```<br></p>
+<p class="image-container"><img src="img\a50d7fc9cd9fe888.png"></p>
+<h2 is-upgraded>Balance</h2>
+<p>Good design will allow us to maintain productivity over time.  However, a principle of agile development is YAGNI (You ain&#39;t gonna need it) - implying that we shouldn&#39;t design for things that may never happen.</p>
+<p>Therefore, if we know that we&#39;ll never need to change databases, or we&#39;ll never need to support a different UI should we go to these lengths?</p>
+<p>A core principle of design is to separate the solution into modules that are cohesive and have a low coupling to other components.  That is, they have a clear responsibility within the application.  If you apply this principle and want clear boundaries between components and responsibilities, you will tend towards interfaces and representations that are contextual (that is, they make sense within the scope of the component or module).</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Reading data from the Database" duration="0">
+        <p>Now that we have inserted data into the database, we want to try and get it back out.  We&#39;ll work from the bottom up, adding the functionality to the repository, and finally exposing the data via a controller.</p>
+<h2 is-upgraded>Write the SQL and map to objects</h2>
+<p>Add this method to <code>GreetingAuditorJDBC</code> (you will need to add the method signature to the interface as well)</p>
+<pre><code>public List&lt;Greeting&gt; allGreetingsByMostRecent() {
+  return jdbc.query(
+      &#34;select * from greeting order by timestamp desc&#34;,
+      new Object[]{},
+      (rs, i) -&gt; new Greeting(rs.getLong(&#34;id&#34;),
+          rs.getString(&#34;name&#34;),
+          rs.getString(&#34;message&#34;),
+          rs.getTimestamp(&#34;timestamp&#34;).toLocalDateTime()
+      )
+ );
+}
+</code></pre>
+<p>Here we are using the JDBC template to send a SQL query to the database, and map the results into a List of  <code>Greeting</code> objects.</p>
+<p>You should note that using the JDBC template removes any concerns about connection handling.  You (as the developer) can focus on the interaction with the database (which is specific to the application in hand).</p>
+<p>In this case, the SQL is a select against the <code>GREETING</code> table to get all rows ordered by the timestamp (so that see them in reverse order).</p>
+<p>The query has no parameters so we don&#39;t need to pass any parameters.  We&#39;ll do that soon, but for now, the 2nd parameter to the <code>query</code> method is <code>new Object[]{}</code> (an empty array of objects).</p>
+<p>In normal JDBC, the query will return a <code>ResultSet</code> and the developer needs to iterate through that.  The template knows this, and so merely needs a function to map each row in the ResultSet into an object.  The template will collect the mapped objects together and return as a list.</p>
+<p>Therefore the 3rd parameter is a function that receives the current row <code>ResultSet</code> (rs) and current index (i) and returns a new <code>Greeting</code> object by passing the fields in the row to the constructor.  Note: we need to transform the timestamp between the database&#39;s type and the Java type.</p>
+<h2 is-upgraded>Call the method from the service</h2>
+<p>Add a method to the service to call the new method in the repository.  Again, you will need to add the signature to the appropriate interface.</p>
+<pre><code>public List&lt;Greeting&gt; allGreetingsByMostRecent() {
+    return greetingAuditor.allGreetingsByMostRecent();
+  }
+</code></pre>
+<h2 is-upgraded>Call the service method from the controllers</h2>
+<p>Now we call the service method from the controller and put the list of <code>Greeting</code> objects on the model.</p>
+<pre><code>@GetMapping(&#34;all-greetings&#34;)
+  public String allGreetings(Model model) {
+
+    //should check for the empty list scenario, but will it out for brevity
+
+    model.addAttribute(&#34;greetings&#34;, theGreetingMaker.allGreetingsByMostRecent());
+    return &#34;greeting-list&#34;;
+  }
+</code></pre>
+<h2 is-upgraded>Create a template to show the allGreetings</h2>
+<p>We&#39;re passing the model to the &#34;greeting-list&#34; template, so we need to write that (in /resources/templates/greeting-list.html).</p>
+<p>Showing the body only for brevity...</p>
+<aside class="special"><p>This also shows how to render a table in Thymeleaf.  The <code>th:each</code> attribute is on the <code>&lt;tr&gt;</code> element as it is the row that will be iterated.  The <code>&lt;td&gt;</code> tags show the data for each greeting.</p>
+</aside>
+<pre><code>&lt;body&gt;
+&lt;h1&gt;Greeting List&lt;/h1&gt;
+
+&lt;table&gt;
+    &lt;thead&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Id&lt;/td&gt;
+        &lt;td&gt;Name&lt;/td&gt;
+        &lt;td&gt;Message&lt;/td&gt;
+        &lt;td&gt;Time&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;/thead&gt;
+
+    &lt;tbody&gt;
+    &lt;tr th:each=&#34;greeting : ${greetings}&#34;&gt;
+        &lt;td th:text=&#34;${greeting.id}&#34;&gt;&lt;/td&gt;
+        &lt;td th:text=&#34;${greeting.name}&#34;&gt;&lt;/td&gt;
+        &lt;td th:text=&#34;${greeting.message}&#34;&gt;&lt;/td&gt;
+        &lt;td th:text=&#34;${greeting.timestamp}&#34;&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+</code></pre>
+<h2 is-upgraded>Run the application</h2>
+<ul>
+<li>Enter some data as before using the form or the direct URLs.</li>
+<li>Browse to <a href="http://localhost:8080/all-greetings" target="_blank">http://localhost:8080/all-greetings</a></li>
+</ul>
+<p>You should see all of the greetings that you&#39;ve entered in reverse order.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Revisit the alterative way to insert data" duration="0">
+        <p>In the <code>GreetingAuditorJDBC</code> class, there is an alternative method of inserting data.</p>
+<pre><code>public void saveGreeting2(Greeting aGreeting) {
+
+    GeneratedKeyHolder holder = new GeneratedKeyHolder();
+
+    jdbc.update(
+            new PreparedStatementCreator() {
+              @Override
+              public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                PreparedStatement ps =
+                        connection.prepareStatement(&#34;insert into greeting(name, message, timestamp) values(?,?,?)&#34;, Statement.RETURN_GENERATED_KEYS);
+
+                ps.setString(1, aGreeting.getName());
+                ps.setString(2, aGreeting.getMessage());
+                ps.setTimestamp(3, Timestamp.valueOf(aGreeting.getTimestamp()));
+                return ps;
+              }
+            },
+            holder);
+
+    aGreeting.setId(holder.getKey().longValue());
+</code></pre>
+<p>This method is more verbose, but is more consistent with the approach used to select data as the SQL query and the mapping of parameters is more explicit.</p>
+<p>In JDBC, we should prefer to use PreparedStatements as they help us to avoid SQL injection attacks.  So in this example, we create a <code>PreparedStatement</code> that takes the required fields as parameters (indicated by ‘?&#39;s).  We then map by index each of our object&#39;s fields into the query. For example, the 1st ‘?&#39; should get the name field, so we set the 1st parameter to the name on the greeting object.</p>
+<p>The wrapper code is a bit verbose, but once done once, it can be copied and pasted as a recurring snippet.</p>
+<p>The <code>SimpleJDBCInsert</code> method is a way of avoiding this repeated code.</p>
+<p>It should be noted that there is no equicalent for &#34;SimpleJdbcUpdate&#34;.  A web search will show that this has been looked at, but that development was stopped in 2019.</p>
+<p>Therefore, the <code>PreparedStatement</code> approach is required for updates and deletes.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Extensions" duration="0">
+        <p>There are a number of extra activities that you can try with this.</p>
+<ul>
+<li>Add a feature where the list of greetings can be filtered by name</li>
+<li>Add the ability to store the type of greeting.</li>
+<li>Add a feature whereby a specific greeting can be toggled between informal and formal.  Update the message and the timestamp accordingly.</li>
+<li>Add a feature to delete a specific greeting.  Provide the id as a parameter.  e.g. &#34;delete greeting 5&#34;</li>
+<li>(More complicated) Add a feature that puts the greeting types into their own table and stores the message pattern alongside it.  For example, the table would contain &#34;formal&#34;,&#34;hello {name} it&#39;s {time}&#34; as a row.  The application would need to check that the URL submitted matches a greeting type in the database.  The service will then need to retrieve the message format from the database and use it to create the message.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

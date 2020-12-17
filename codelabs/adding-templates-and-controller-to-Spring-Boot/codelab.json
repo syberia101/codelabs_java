@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-10-22T14:08:42+01:00",
+  "id": "adding-templates-and-controller-to-Spring-Boot",
+  "duration": 10,
+  "title": "Adding a Template and Controller to a Spring Boot Application",
+  "authors": "Carl Jones",
+  "summary": "Adding templates and a controller to a Spring Boot Application",
+  "source": "adding-templates-and-a-controller.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "adding-templates-and-controller-to-Spring-Boot"
+}

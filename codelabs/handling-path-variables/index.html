@@ -1,0 +1,106 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Handling Path Variables</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="handling-path-variables"
+                  title="Handling Path Variables"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="10">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>How to extract variables from the URL</li>
+<li>How to handle variations in the path</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Understand the goal" duration="0">
+        <p>We want to offer different paths for different types of greeting.  We want to support<br>both format and informal greetings.</p>
+<p>If we go to /greet?name=Pat we&#39;ll just see the time.<br>If we go to /greet/formal?name=Pat we&#39;ll say &#34;hello&#34;<br>If we go to /greet/informal?name=Pat we&#39;ll say &#34;hi&#34;</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Amend the controller" duration="0">
+        <p>Let&#39;s amend the controller.  Add a Path Variable parameter and some logic.</p>
+<pre><code>//code omitted
+@GetMapping({&#34;greet&#34;, &#34;greet/{type}&#34;})
+public String sayHello(@PathVariable(name = &#34;type&#34;, required = false) Optional&lt;String&gt; type,
+              @RequestParam(value = &#34;name&#34;, defaultValue = &#34;CM6713&#34;) String aName, Model model) {
+
+    String prefix = &#34;&#34;;
+
+    if (type.isPresent()) {
+      if (type.get().equals(&#34;formal&#34;)) {
+        prefix = &#34;Hello&#34;;
+      }
+      if (type.get().equals(&#34;informal&#34;)) {
+        prefix = &#34;Hi&#34;;
+      }
+    }
+</code></pre>
+<ul>
+<li>This method now support two URKL patterns.</li>
+<li>The type parameter is extracted from the URL.  The name maps to the field between curly braces in the URL.</li>
+<li>We use an Optional&lt;&gt; to handle the potential that the path might be missing from the URL.</li>
+<li>We then have some logic that determines the prefix based on presence and (if present) value.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test" duration="0">
+        <p>To test this, run gradle &gt; build &gt; classes again and then go to http://localhost:8080/greet.</p>
+<p>Now, try the following:</p>
+<ul>
+<li>http://localhost:8080/greet/formal?name=Patrick</li>
+<li>http://localhost:8080/greet/informal?name=Patrick</li>
+<li>http://localhost:8080/greet?name=Patrick</li>
+</ul>
+<p>Notice how the message changes.</p>
+<ul>
+<li>Try http://localhost:8080/greet/cockney?name=Patrick</li>
+</ul>
+<p>You should get the default.  Maybe we&#39;d be better off returning a 404 here because that page (resource) doesn&#39;t exist?</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review" duration="0">
+        <p>In this tutorial, we&#39;ve introduced the notion of a path variable and how to deal with variations in the URL.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

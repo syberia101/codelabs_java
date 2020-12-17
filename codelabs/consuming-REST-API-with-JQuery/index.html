@@ -1,0 +1,118 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Consuming a RESTful API with JQuery</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="consuming-REST-API-with-JQuery"
+                  title="Consuming a RESTful API with JQuery"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="10">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>Using JQuery&#39;s AJAX support for access a REST APIs</li>
+<li>Injecting the data into a web page</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Understand the goal" duration="0">
+        <p>We want to explore different architectures which we vary by altering where the user interface is generated.</p>
+<p>With Thymeleaf, we generate the HTML on the server.  When using the server to host APIs, the user interface is generated on the client.</p>
+<p>This can reduce the number of round-trips across the network and can lead to a more responsive user interface.  Most modern web applications use client-side frameworks such as React.js, Vue.js, Angular.js or Svelte.  These frameworks add MVC capabilities to the client whereby the user interface reacts to changes in the client-side model.</p>
+<p>However, there is also a potential downside as reduced round-trips can allow the client&#39;s model to lag behind the server model.  Think about applications like theatre or flight booking systems where events update the shared model (e.g. seats available for a flight).</p>
+<h2 is-upgraded>Context</h2>
+<p>If not already watched, take time to view <a href="https://www.youtube.com/watch?v=Bw1dgUS27uE" target="_blank">The Browser is Dead</a></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add a web page" duration="0">
+        <p>We need a web page that will provide formatting and structure to our content.  This can be a static file as we are not generating any content on the server.</p>
+<p>There is nothing to stop us mixing and matching server-side and client-side approaches, so this could be a template.</p>
+<p>Be careful with routing.  In the gitlab example, we have added a routing line to the <code>StaticRouter.java</code> file.</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&#34;en&#34;&gt;
+&lt;head&gt;
+    &lt;meta charset=&#34;UTF-8&#34;&gt;
+    &lt;title&gt;Greeting with JQuery&lt;/title&gt;
+    &lt;script src=&#34;https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js&#34;&gt;&lt;/script&gt;
+    &lt;script src=&#34;/js/GreetingApiClient.js&#34;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div&gt;
+    &lt;span id=&#34;greeting-message&#34;&gt;&lt;/span&gt;
+
+    &lt;span id=&#34;greeting-name&#34;&gt;&lt;/span&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>NOTE: There are two spans identified with id attributes that contain no content.  You could put dummy content in the page.</p>
+<aside class="special"><p>What would that allow you to do with the roles in the team?</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Code the Javascript" duration="0">
+        <p>In the HTML, we included a Javascript file.  Let&#39;s add that (to the /js folder under static content).</p>
+<pre><code>$(document).ready(function () {
+    $.ajax({
+        url: &#34;http://localhost:8080/api/greet&#34;
+    }).then(function (greeting) {
+        $(&#39;#greeting-name&#39;).append(greeting.name);
+        $(&#39;#greeting-message&#39;).append(greeting.message);
+    });
+});
+</code></pre>
+<p>This JQuery runs when the page is ready.</p>
+<p>It calls the API and when the response is received, passes the data received to a function that appends the received data to the spans.  We could replace rather than append.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Testing" duration="0">
+        <p>Testing is now different because the processing is distributed between server and client.  The page isn&#39;t rendered until the JQuery completes so the server response isn&#39;t sufficient to check.</p>
+<p>There are other testing tools for this.  These sit at the top of the testing pyramid.  Examples include Selenium and Playwright.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review" duration="0">
+        <p>In this tutorial, we have written JQuery to consume an API and use the received data to populate a HTML page.</p>
+<p>While still useful, JQuery is falling out of favour and alternative client-side frameworks are gaining market share.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>

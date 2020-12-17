@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-11-09T17:17:40Z",
+  "id": "using-profiles",
+  "duration": 20,
+  "title": "Using Spring Boot Profiles to support multiple databases",
+  "authors": "Carl Jones",
+  "summary": "Using Spring Boot Profiles to support multiple databases",
+  "source": "using-profiles.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "sample"
+  ],
+  "tags": [
+    "medium"
+  ],
+  "url": "using-profiles"
+}

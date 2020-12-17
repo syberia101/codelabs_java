@@ -1,0 +1,134 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Adding a Template and Controller to a Spring Boot Application</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="adding-templates-and-controller-to-Spring-Boot"
+                  title="Adding a Template and Controller to a Spring Boot Application"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="10">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul class="checklist">
+<li>Adding a controller to handle the request</li>
+<li>Populating a &#34;model&#34; to pass to the view</li>
+<li>Adding a template to Spring Boot</li>
+<li>Injecting model data into the view</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Adding a controller" duration="0">
+        <p>The first thing we want to do is add a class that can respond to web requests.<br>Spring&#39;s support for this is via the Spring MVC framework.<br>MVC stands for &#34;Model-View-Controller&#34; which is a well-known design pattern for separating<br>responsibility in an application.  It originated with the Smalltalk langauge in the 1970s<br>and has been adopted and adapted by many frameworks across many platforms.</p>
+<ul>
+<li>Create a class called &#34;ExampleController&#34; in the &#34;web&#34; package (assuming you&#39;ve followed the previous tutorials)</li>
+<li>Add this code: (add your own package line at the top)</li>
+</ul>
+<pre><code>import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class ExampleController {
+
+  @GetMapping(&#34;greet&#34;)
+  public String sayHello(Model model) {
+
+    Greeting aGreeting = new Greeting(&#34;CM6213&#34;, &#34;Hello&#34;);
+    model.addAttribute(&#34;greeting&#34;, aGreeting);
+
+    return &#34;hello&#34;;
+  }
+}
+</code></pre>
+<p>Let&#39;s note a few things about this.</p>
+<h2 is-upgraded>The class annotation</h2>
+<p>The class is annotated with the <code>@Controller</code> annotation.  This tells Spring<br>that this class provides methods to handle web requests.  At this point in<br>time, we won&#39;t need to know any more.</p>
+<h2 is-upgraded>The method annotation</h2>
+<p>The <code>sayHello</code> method is annotated with the <code>@GetMapping</code> annotation.<br>This tells Spring that GET requests to the address &#34;/greet&#34; should be directed to<br>this method to handle.</p>
+<h2 is-upgraded>The model parameter</h2>
+<p>At the moment, we&#39;re not passing any parameters over the request, so the only parameter<br>is a Model.  This class is provided by Spring and is injected automatically for us.</p>
+<p>The Model class allows the controller to bundle a set of objects that can be<br>passed to the view.</p>
+<h2 is-upgraded>The method code</h2>
+<p>The code is quite simple.  It constructs a new <code>Greeting</code> object which is<br>a Lombok-ed class containing two fields.  (You need to code this yourselves).</p>
+<p>We then add this object to the model using the <code>addAttribute</code> method.  This<br>takes a key and a value.  The view will get the object according to the key.</p>
+<h2 is-upgraded>Specifying the next View</h2>
+<p>The final line of the method tells us the name of the view that should be<br>shown next.  In this case, &#34;hello&#34;.  Spring will look for a template file called<br>&#34;hello.html&#34;.  Again, it will do this by convention, so it will look in a known place.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Adding the template" duration="0">
+        <p>That known place is the <code>resources/templates</code> folder.</p>
+<p>In here, we place a hello.html file.</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&#34;en&#34;&gt;
+&lt;head&gt;
+    &lt;meta charset=&#34;UTF-8&#34;&gt;
+    &lt;title&gt;Hello&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;div th:text=&#34;${greeting.message}&#34;&gt;&lt;/div&gt;
+&lt;div th:text=&#34;${greeting.name}&#34;&gt;&lt;/div&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>This is fairly standard HTML, except for the <code>th:text</code> attributes.<br>This is the Thymeleaf template engine.  It will replace the content of the DIV elements<br>with the values of the fields in the object that it references with the &#34;greeting&#34; key.</p>
+<p>Thymeleaf has the advantage that you populate the content in the template and preview it<br>as a static page with dummy content.</p>
+<aside class="special"><p>What do you think is the advantage of this?</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Test" duration="0">
+        <p>To test this, run gradle &gt; build &gt; classes again and then go to http://localhost:8080/greet.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review" duration="0">
+        <p>In this tutorial, we&#39;ve introduced all of the basic parts of the MVC framework.</p>
+<ul>
+<li>The model: the Greeting object is added to the Model object.</li>
+<li>The view: the hello.html file provides the view and injects data from the Model</li>
+<li>The controller: the ExampleController class handles the request, decides what to do, populates the model and decides which view comes next.</li>
+</ul>
+<aside class="special"><p>In this example, the controller has done all the work itself.  We would prefer the controller to stick to a discrete set of responsibilities.  It should delegate to other objects for the core processing.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>
